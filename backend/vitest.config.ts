@@ -49,7 +49,8 @@ export default defineConfig({
         'backend/src/bootstrap/server.ts',
         'backend/src/bootstrap/worker.ts',
       ],
-      // TESTs §4.1.
+      // TESTs §4.1. Solo se exigen con `npm run verify:coverage` (Issues ISS-TEST-*);
+      // `verify:adrs` y `test:unit` no miden cobertura (AGENTS.md §3.1).
       thresholds: {
         lines: 80,
         branches: 75,
