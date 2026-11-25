@@ -5,18 +5,19 @@
 | Campo | Valor |
 |---|---|
 | Documento | Software Development Plan / Implementation Backlog + MVP Release Plan |
-| Versión | 1.0 |
+| Versión | 1.1 |
 | Fecha | 2026-11-25 |
 | Estructura | MVP en 2 Etapas — Etapa 1: Vertical Slice demo end-to-end en Docker/Docker Compose · Etapa 2: completitud del MVP (PRD v2.4) |
 | Stack objetivo | Monorepo npm (`backend/` + `frontend/`, Node.js 26, TypeScript estricto), API Express, Next.js 14+ (BFF), Prisma + PostgreSQL 15/16 con PgBouncer, Redis/BullMQ, Mailpit (SMTP dev), Docker Compose |
-| Épicas | **22** (`EP-01..EP-22`: 8 en Etapa 1, 14 en Etapa 2) |
-| Historias de Usuario | **35** (`US-001..US-035`) |
-| Issues de Codificación (`ISS-CODE`) | **52** (`ISS-CODE-001..052`; 49 con par + 3 de calidad self-test con paridad justificada) |
-| Issues de Pruebas (`ISS-TEST`) | **49** (`ISS-TEST-001..052` con 026/048/050 reservados; paridad 49/49) |
-| Total Issues | **101** (48 en MVP-Stage-1, 53 en MVP-Stage-2) |
-| Distribución `model_tier` | **frontier 43 / economy 58** (sobre los 101 issues; en los 52 issues de código: 26/26) |
+| Épicas | **23** (`EP-01..EP-23`: 8 en Etapa 1, 15 en Etapa 2) |
+| Historias de Usuario | **41** (`US-001..US-041`) |
+| Issues de Codificación (`ISS-CODE`) | **61** (`ISS-CODE-001..061`; 58 con par + 3 de calidad self-test con paridad justificada) |
+| Issues de Pruebas (`ISS-TEST`) | **58** (`ISS-TEST-001..061` con 026/048/050 reservados; paridad 58/58) |
+| Total Issues | **119** (48 en MVP-Stage-1, 71 en MVP-Stage-2) |
+| Distribución `model_tier` | **frontier 50 / economy 69** (sobre los 119 issues; en los 61 issues de código: 31/30) |
 | Base normativa | PRD v2.4 · SRS v1.3 · SAD v1.4 · DDD v1.4 · API v1.4.0 · ADRs (71 + 001..022) · UXUI v1.1 (SCR-001..065) · TESTs (264 casos) · CICD v1.0 · Decisiones v1.6 |
 | Consumidores | (1) script/agente creador de Issues en GitHub (`gh` CLI), (2) agentes codificadores/testers/validadores que toman Issues autónomamente |
+| Historial | **1.0** (2026-11-25) versión auditada en `ProveeEventos_CrossAudit_Report.md` (101 Issues) · **1.1** (2026-11-25) cierre de brechas `RR-04`/`RR-09` con `EP-23` y `ISS-CODE/TEST-053..061`, parches de trazabilidad en 26 Issues y `blocks` regenerado (119 Issues) |
 
 ---
 
@@ -98,6 +99,7 @@ Fuera de Etapa 1 (va a Etapa 2 o Post-MVP): Instant Book, WhatsApp, reseñas, tr
 | EP-20 Accesibilidad, E2E y carga | WCAG 2.1 AA (axe + manual), E2E completa, k6 Baseline/Spike/Soak, observabilidad | SRS-NFR-USA/PERF, TESTs §7/§11 |
 | EP-21 Membresías avanzadas | Invitaciones completas, roles, transferencia de propiedad `SCR-036/037` | SRS-AUTH-006/009 |
 | EP-22 Planes y límites | Planes PRUEBA/limites atómicos, vencimiento, `SCR-038` | SRS-TEN-003/004, DEC-029 |
+| EP-23 Cierre de cobertura del MVP | Portafolio multimedia, paquetes, taxonomía administrable, plantillas propias/globales, ciclo y equipo del evento, empresa activa, superficie pública y legal, jobs de `scheduler`/`maintenance`, backups y restauración; cierra el riesgo **RR-04** (`Plans/Plan0006_BacklogGaps.md`) | SRS-CAT-002/004..007, SRS-EVT-004..008, SRS-TEN-005, SRS-ADM-002/003, SRS-NFR-AVL-001..005, SRS-NFR-PRIV-001, SRS-NFR-SCAL-006 |
 
 ### 2.3 Hitos y Entregables (M0–M6)
 
@@ -108,7 +110,7 @@ Fuera de Etapa 1 (va a Etapa 2 o Post-MVP): Instant Book, WhatsApp, reseñas, tr
 | **M2 — Cotización rápida demostrable** | EP-05 (Wave-2): evento+ítem+comparación de 1 proveedor | Recorrido A hasta "aceptar proveedor" sin errores | ~1 semana |
 | **M3 — Flujo por link con correo real** | EP-06 (Wave-3): e-RFQ→Mailpit→formulario público→oferta→adjudicación→contratación→cierre | Recorrido A completo punto a punto; correo visible en Mailpit; cierre con comisión registrada | ~1.5 semanas |
 | **M4 — Demo Etapa 1 completa** | EP-07+EP-08 (Wave-4): templates y flujo grupal + smoke E2E automatizado | Recorrido B completo; `npm run test:e2e:smoke` verde en local y CI; **Release Demo Etapa 1** | ~1.5 semanas |
-| **M5 — MVP funcional completo** | EP-09..EP-18 + EP-21/22 (Wave-5..10): todo el alcance funcional del MVP | Suites `test:unit/int/api/mt/conc/sec` verdes; smoke 12 escenarios SRS §8; calidad según gates de `ProveeEventos_TESTs.md` G-01..G-13 | ~5–6 semanas |
+| **M5 — MVP funcional completo** | EP-09..EP-18 + EP-21/22 (Wave-5..10) + EP-23 (Wave-11..13): todo el alcance funcional del MVP | Suites `test:unit/int/api/mt/conc/sec` verdes; smoke 12 escenarios SRS §8; calidad según gates de `ProveeEventos_TESTs.md` G-01..G-13 | ~5–6 semanas |
 | **M6 — MVP endurecido (Release)** | EP-19+EP-20 (Wave-8/9): Auth0 real, RLS-CI, a11y, carga, observabilidad | Gates G-14..G-19 de TESTs; criterios de liberación §9.3; **Release MVP** | ~2 semanas |
 
 Alineación de calendario: M0–M4 ≈ semanas 1–7 (equivalente vertical del arranque de E1 del PRD); M5–M6 ≈ semanas 8–15 (completitud E1 + E2 del PRD). Sin teams humanos intermedios: los hitos son puntos de corte de demos, no gates de aprobación humana salvo los marcados (integración del primer PR de gobernanza, CICD §7.6).
@@ -467,8 +469,11 @@ flowchart TD
 | Wave-8 | 029, 033, 035 | EP-10/11/12 | rfq-offers(portal) ∥ quotation(tracking) ∥ availability-booking |
 | Wave-9 | 030, 036, 046, 048, 049 | EP-10/13/18/19/20 | rfq-offers ∥ availability-booking ∥ administration-audit ∥ cross-cutting(RLS CI) ∥ frontend(a11y) |
 | Wave-10 | 037, 040, 050 | EP-13/15/20 | comisiones (administration-audit + availability-booking) ∥ suspensión (administration-audit + availability-booking + provider-catalog + rfq-offers, subcarpetas propias) ∥ cross-cutting (carga/observabilidad) |
+| Wave-11 | 053, 054, 055, 056 | EP-23 | `provider-catalog/media` ∥ `provider-catalog/packages` ∥ `taxonomy-templates/admin` ∥ `taxonomy-templates/event-templates` |
+| Wave-12 | 057, 058, 059 | EP-23 | `event-management/lifecycle` ∥ `organizations/current` ∥ `frontend/(public)`+`frontend/(system)` |
+| Wave-13 | 060, 061 | EP-23 | `jobs/scheduler`+`jobs/maintenance` ∥ `infra/ops`+`scripts/ops` |
 
-**Estimación agregada por ola (pares CODE, suma de sus `estimate`):** Wave-0 ≈ L+L+M+L · Wave-1 ≈ L+L+M+S+M+S+S · Wave-2 ≈ M+M+L+S · Wave-3 ≈ L+M+M · Wave-4 ≈ L+M · Wave-5 ≈ M+M+S+S+M · Wave-6 ≈ L+L+L+S+M+M · Wave-7 ≈ M+M+M+M+L+S · Wave-8 ≈ M+M+M · Wave-9 ≈ M+L+M+L+L · Wave-10 ≈ M+L+L (detalle por Issue en Sección 8).
+**Estimación agregada por ola (pares CODE, suma de sus `estimate`):** Wave-0 ≈ L+L+M+L · Wave-1 ≈ L+L+M+S+M+S+S · Wave-2 ≈ M+M+L+S · Wave-3 ≈ L+M+M · Wave-4 ≈ L+M · Wave-5 ≈ M+M+S+S+M · Wave-6 ≈ L+L+L+S+M+M · Wave-7 ≈ M+M+M+M+L+S · Wave-8 ≈ M+M+M · Wave-9 ≈ M+L+M+L+L · Wave-10 ≈ M+L+L · Wave-11 ≈ L+L+M+M · Wave-12 ≈ L+M+M · Wave-13 ≈ M+M (detalle por Issue en Sección 8).
 
 ## Sección 6 — Backlog Ejecutable: MVP Etapa 1
 
@@ -615,7 +620,7 @@ model_tier: frontier
 paired_test_issue: ISS-TEST-002
 paired_code_issue: null
 depends_on: [ISS-CODE-001]
-blocks: [ISS-CODE-004, ISS-CODE-005, ISS-CODE-006]
+blocks: [ISS-CODE-004, ISS-CODE-005, ISS-CODE-006, ISS-CODE-061]
 allowed_paths:
   - docker-compose.yml
   - docker/pgbouncer/**
@@ -808,7 +813,7 @@ model_tier: frontier
 paired_test_issue: ISS-TEST-004
 paired_code_issue: null
 depends_on: [ISS-CODE-001, ISS-CODE-002, ISS-CODE-003]
-blocks: [ISS-CODE-005, ISS-CODE-006, ISS-CODE-012, ISS-CODE-020, ISS-CODE-048]
+blocks: [ISS-CODE-005, ISS-CODE-006, ISS-CODE-012, ISS-CODE-020, ISS-CODE-048, ISS-CODE-061]
 allowed_paths:
   - backend/prisma.config.ts
   - backend/src/prisma/schema.prisma
@@ -877,7 +882,7 @@ forbidden_paths:
   - backend/src/prisma/**
 source_refs:
   - TDD: Sec 10.3
-  - TESTs: TC-INT-001..014, TC-MT-010..019
+  - TESTs: TC-INT-001..014, TC-MT-010..019, TC-API-001, TC-API-002, TC-API-010, TC-API-016, TC-INT-034, TC-INT-035, TC-INT-036, TC-INT-037
   - ADRs: [ADR-TEST-002, ADR-TEST-004]
 github_labels:
   - stage:mvp-1
@@ -934,6 +939,7 @@ source_refs:
   - CICD: Sec 4.2, 7.3-7.6, 13.1 (orden 4-5), 13.3 (AC-09..AC-17)
   - ADRs: [ADR-GOV-001..007, ADR-TEST-006]
   - TESTs: Seccion 2.4 (AS-01..AS-10)
+  - SRS: SRS-NFR-SCAL-004, SRS-NFR-SCAL-005
 github_labels:
   - stage:mvp-1
   - type:infra
@@ -982,7 +988,7 @@ forbidden_paths:
   - .github/**
 source_refs:
   - CICD: Sec 7.3-7.5
-  - TESTs: Seccion 2.4 (AS-01..AS-10), TC-ARCH-009/012
+  - TESTs: Seccion 2.4 (AS-01..AS-10), TC-ARCH-009/012, TC-SEC-026, TC-SEC-027, TC-SEC-028, TC-SEC-029
   - ADRs: [ADR-GOV-003, ADR-TEST-006]
 github_labels:
   - stage:mvp-1
@@ -1019,7 +1025,7 @@ model_tier: frontier
 paired_test_issue: ISS-TEST-006
 paired_code_issue: null
 depends_on: [ISS-CODE-002, ISS-CODE-003, ISS-CODE-004]
-blocks: [ISS-CODE-007, ISS-CODE-012, ISS-CODE-016, ISS-CODE-017, ISS-CODE-027, ISS-CODE-041, ISS-TEST-002]
+blocks: [ISS-CODE-007, ISS-CODE-012, ISS-CODE-016, ISS-CODE-017, ISS-CODE-027, ISS-CODE-041, ISS-CODE-059, ISS-CODE-061, ISS-TEST-002]
 allowed_paths:
   - backend/src/bootstrap/**
   - backend/src/shared/**
@@ -1092,7 +1098,7 @@ forbidden_paths:
   - backend/src/shared/**
   - backend/src/bootstrap/**
 source_refs:
-  - TESTs: TC-INT-027..033, TC-API-003/004, TC-UNIT-001..003, TC-CONC-005, TC-SEC-010
+  - TESTs: TC-INT-027..033, TC-API-003/004, TC-UNIT-001..003, TC-CONC-005, TC-SEC-010, TC-API-029, TC-INT-043
   - SAD: Sec 10.6, 10.8
 github_labels:
   - stage:mvp-1
@@ -1133,7 +1139,7 @@ model_tier: frontier
 paired_test_issue: ISS-TEST-007
 paired_code_issue: null
 depends_on: [ISS-CODE-005, ISS-CODE-006]
-blocks: [ISS-CODE-008, ISS-CODE-009, ISS-TEST-009, ISS-CODE-010, ISS-CODE-047]
+blocks: [ISS-CODE-008, ISS-CODE-009, ISS-CODE-010, ISS-CODE-047, ISS-TEST-009]
 allowed_paths:
   - backend/src/modules/identity-access/**
   - backend/src/shared/security/**
@@ -1227,7 +1233,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-008
 paired_code_issue: null
 depends_on: [ISS-CODE-007, ISS-CODE-009]
-blocks: [ISS-CODE-010, ISS-CODE-014, ISS-CODE-020, ISS-CODE-051, ISS-CODE-052]
+blocks: [ISS-CODE-010, ISS-CODE-014, ISS-CODE-020, ISS-CODE-051, ISS-CODE-052, ISS-CODE-058]
 allowed_paths:
   - backend/src/modules/organizations/**
   - frontend/src/app/registro/**
@@ -1323,7 +1329,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-009
 paired_code_issue: null
 depends_on: [ISS-CODE-007]
-blocks: [ISS-CODE-008, ISS-CODE-015, ISS-CODE-048, ISS-CODE-049]
+blocks: [ISS-CODE-008, ISS-CODE-015, ISS-CODE-048, ISS-CODE-049, ISS-CODE-059]
 allowed_paths:
   - frontend/src/app/(app)/**
   - frontend/src/components/shell/**
@@ -1415,7 +1421,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-010
 paired_code_issue: null
 depends_on: [ISS-CODE-007, ISS-CODE-008]
-blocks: [ISS-CODE-011, ISS-TEST-011, ISS-CODE-012, ISS-CODE-014]
+blocks: [ISS-CODE-011, ISS-CODE-012, ISS-CODE-014, ISS-CODE-053, ISS-TEST-011]
 allowed_paths:
   - backend/src/modules/provider-catalog/**
   - frontend/src/app/registro/proveedor/**
@@ -1589,7 +1595,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-012
 paired_code_issue: null
 depends_on: [ISS-CODE-004, ISS-CODE-006, ISS-CODE-010]
-blocks: [ISS-CODE-013, ISS-CODE-014, ISS-CODE-020, ISS-CODE-039, ISS-CODE-045]
+blocks: [ISS-CODE-013, ISS-CODE-014, ISS-CODE-020, ISS-CODE-039, ISS-CODE-045, ISS-CODE-054, ISS-CODE-055]
 allowed_paths:
   - backend/src/modules/taxonomy-templates/**
   - backend/src/modules/administration-audit/**
@@ -1682,7 +1688,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-013
 paired_code_issue: null
 depends_on: [ISS-CODE-012]
-blocks: [ISS-CODE-014, ISS-CODE-048]
+blocks: [ISS-CODE-014, ISS-CODE-048, ISS-CODE-053, ISS-CODE-054]
 allowed_paths:
   - backend/src/modules/provider-catalog/**
   - frontend/src/app/proveedores/**
@@ -1770,7 +1776,7 @@ model_tier: frontier
 paired_test_issue: ISS-TEST-014
 paired_code_issue: null
 depends_on: [ISS-CODE-008, ISS-CODE-010, ISS-CODE-012, ISS-CODE-013]
-blocks: [ISS-CODE-015, ISS-TEST-015, ISS-CODE-016]
+blocks: [ISS-CODE-015, ISS-CODE-016, ISS-CODE-057, ISS-TEST-015]
 allowed_paths:
   - backend/src/modules/event-management/**
   - backend/src/modules/quotation/**
@@ -1779,7 +1785,7 @@ forbidden_paths:
   - backend/src/modules/rfq-offers/**
 source_refs:
   - SRS: SRS-EVT-001/002/006/011, SRS-QUO-001..005/007/008
-  - API: createEvent, listEvents, createQuotation, createQuickQuotation, getQuotation, updateQuotationSelections, listQuotations
+  - API: createEvent, listEvents, createQuotation, createQuickQuotation, getQuotation, updateQuotationSelections, listQuotations, listQuickQuotations, unmarkQuickQuotationFavorite, removeQuotationItem
   - DDD: Sec 5.7/5.9 (Quotation, Event), Sec 6.1 (Money), Sec 7 (QuotationPricingService, ProviderRankingPolicy)
   - UXUI: SCR-015 (versión mínima), SCR-019, SCR-021
   - TESTs: TC-UNIT-014..026, TC-INT-023/026, TC-API-013/040
@@ -1861,7 +1867,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-015
 paired_code_issue: null
 depends_on: [ISS-CODE-009, ISS-CODE-014]
-blocks: [ISS-CODE-019, ISS-CODE-022, ISS-CODE-049]
+blocks: [ISS-CODE-019, ISS-CODE-022, ISS-CODE-049, ISS-CODE-057]
 allowed_paths:
   - frontend/src/app/(app)/app/cotizacion-rapida/**
   - frontend/src/app/(app)/app/eventos/**
@@ -1950,7 +1956,7 @@ model_tier: frontier
 paired_test_issue: ISS-TEST-016
 paired_code_issue: null
 depends_on: [ISS-CODE-006, ISS-CODE-014]
-blocks: [ISS-TEST-015, ISS-CODE-017, ISS-CODE-018, ISS-CODE-019, ISS-CODE-027, ISS-CODE-043, ISS-CODE-048]
+blocks: [ISS-CODE-017, ISS-CODE-018, ISS-CODE-019, ISS-CODE-027, ISS-CODE-043, ISS-CODE-048, ISS-TEST-015]
 allowed_paths:
   - backend/src/modules/rfq-offers/**
   - backend/src/modules/quotation/rfq-launch/**
@@ -2047,7 +2053,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-017
 paired_code_issue: null
 depends_on: [ISS-CODE-006, ISS-CODE-016]
-blocks: [ISS-CODE-018, ISS-TEST-018, ISS-CODE-019, ISS-CODE-042]
+blocks: [ISS-CODE-018, ISS-CODE-019, ISS-CODE-042, ISS-TEST-018]
 allowed_paths:
   - backend/src/modules/messaging-notifications/**
   - backend/src/shared/infrastructure/email/**
@@ -2239,7 +2245,7 @@ source_refs:
   - SAD: Sec 7.2 (adjudicación), Sec 7.5 (ConfirmBooking), Sec 10.6 (AWARD_ALREADY_EXISTS, CAPACITY_EXHAUSTED)
   - TDD: F2 (adjudicación), F8 (cierre)
   - UXUI: SCR-025, SCR-028, SCR-029, SCR-051, SCR-052
-  - API: getBidTabulation, awardRfqOffer, listBookings, getBooking, recordBookingCompletion
+  - API: getBidTabulation, awardRfqOffer, listBookings, getBooking, recordBookingCompletion, getBookingProviderContact, getBookingHistory
   - TESTs: "TC-INT-018/022, TC-API-019/036, TC-UNIT-036/040, TC-CONC-002/016 (versión Etapa 1: 1 proveedor)"
 github_labels:
   - stage:mvp-1
@@ -2287,7 +2293,7 @@ allowed_paths:
 forbidden_paths:
   - backend/src/modules/rfq-offers/**
 source_refs:
-  - TESTs: TC-INT-016/018/022, TC-API-019/036, TC-CONC-002/016, TC-MT-004
+  - TESTs: TC-INT-016/018/022, TC-API-019/036, TC-CONC-002/016, TC-MT-004, TC-API-033
 github_labels:
   - stage:mvp-1
   - type:test
@@ -2323,7 +2329,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-020
 paired_code_issue: null
 depends_on: [ISS-CODE-004, ISS-CODE-008, ISS-CODE-012]
-blocks: [ISS-CODE-021, ISS-CODE-022, ISS-CODE-024]
+blocks: [ISS-CODE-021, ISS-CODE-022, ISS-CODE-024, ISS-CODE-056]
 allowed_paths:
   - backend/src/modules/taxonomy-templates/event-templates/**
   - backend/src/prisma/seed/reference/event-templates/**
@@ -2828,7 +2834,7 @@ allowed_paths:
 forbidden_paths:
   - backend/src/modules/availability-booking/**
 source_refs:
-  - TESTs: TC-INT-015..017/020/024, TC-API-018/032, TC-UNIT-031..034
+  - TESTs: TC-INT-015..017/020/024, TC-API-018/032, TC-UNIT-031..034, TC-E2E-003
 github_labels:
   - stage:mvp-2
   - type:test
@@ -2909,7 +2915,7 @@ model_tier: frontier
 paired_test_issue: ISS-TEST-027
 paired_code_issue: null
 depends_on: [ISS-CODE-016, ISS-CODE-006]
-blocks: [ISS-CODE-028]
+blocks: [ISS-CODE-028, ISS-CODE-060]
 allowed_paths:
   - backend/src/jobs/rfq-sla/**
   - backend/src/modules/rfq-offers/sla/**
@@ -3087,7 +3093,7 @@ forbidden_paths:
   - backend/src/modules/messaging-notifications/**
 source_refs:
   - SRS: SRS-RFQ-006 (portal), SRS-CAT-009
-  - API: submitProviderPortalOffer, listRfqRequests (proveedor), getPublicProviderAvailability
+  - API: submitProviderPortalOffer, listRfqRequests (proveedor), getPublicProviderAvailability, listRfqOffers
   - UXUI: SCR-049, SCR-050
   - TESTs: TC-MT-008/025, TC-API-032
 github_labels:
@@ -3255,6 +3261,7 @@ source_refs:
   - DEC: DEC-016/018/032
   - API: updateQuotationSelections, requestQuotationPdf, listQuotationDocuments, getDocument
   - TESTs: TC-UNIT-024/026, TC-INT-023/026, TC-API-037/040
+  - UXUI: SCR-022
 github_labels:
   - stage:mvp-2
   - type:code
@@ -3889,7 +3896,7 @@ allowed_paths:
 forbidden_paths:
   - backend/src/modules/reviews/**
 source_refs:
-  - TESTs: TC-UNIT-050, TC-CONC-012, TC-API-025, TC-MT-028
+  - TESTs: TC-UNIT-050, TC-CONC-012, TC-API-025, TC-MT-028, TC-E2E-006
 github_labels:
   - stage:mvp-2
   - type:test
@@ -4024,7 +4031,7 @@ source_refs:
   - SRS: SRS-ADM-005/013, SRS-AUTH-007
   - SAD: Sec 7.6 (transacción única, FOR UPDATE), Sec 8.2 (job «Plazo de revisión por suspensión»)
   - DEC: DEC-034/036
-  - API: setProviderSuspension, decideSuspensionReview, resolveBookingDispute
+  - API: setProviderSuspension, decideSuspensionReview, resolveBookingDispute, listDisputes
   - UXUI: SCR-030, SCR-062, F-06
   - TESTs: TC-INT-021, TC-UNIT-038/039, TC-CONC-006, TC-E2E-012, TC-MT-008 (bloqueos del suspendido)
 github_labels:
@@ -4104,7 +4111,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-041
 paired_code_issue: null
 depends_on: [ISS-CODE-006]
-blocks: [ISS-CODE-042, ISS-CODE-049]
+blocks: [ISS-CODE-042, ISS-CODE-049, ISS-CODE-060]
 allowed_paths:
   - backend/src/modules/messaging-notifications/in-app/**
   - frontend/src/app/notificaciones/**
@@ -4112,7 +4119,7 @@ allowed_paths:
 forbidden_paths:
   - backend/src/modules/rfq-offers/**
 source_refs:
-  - SRS: SRS-NOT-002/003
+  - SRS: SRS-NOT-002/003, SRS-AUTH-008
   - API: listNotifications, markNotificationRead, updateMyPreferences
   - UXUI: SCR-039, SCR-040
   - TESTs: TC-MT-022 (aislamiento avisos), TC-UNIT-030 (render determinista)
@@ -4281,7 +4288,7 @@ forbidden_paths:
   - backend/src/modules/messaging-notifications/**
 source_refs:
   - SRS: SRS-WA-001/002/003/004, SRS-ADM-004
-  - API: buildWhatsappClickToChat, listWhatsappTemplates, createWhatsappTemplate, listOrganizationWhatsappTemplates
+  - API: buildWhatsappClickToChat, listWhatsappTemplates, createWhatsappTemplate, listOrganizationWhatsappTemplates, createOrganizationWhatsappTemplate, updateOrganizationWhatsappTemplate, listAvailableWhatsappTemplates, updateWhatsappTemplate
   - DEC: DEC-021/022/028
   - UXUI: SCR-026, SCR-034/060
   - TESTs: TC-UNIT-030, TC-API-034, PRIV-008 (marcadores)
@@ -4404,7 +4411,7 @@ allowed_paths:
 forbidden_paths:
   - backend/src/modules/assisted-response/**
 source_refs:
-  - TESTs: TC-UNIT-048/049, TC-SEC-018
+  - TESTs: TC-UNIT-048/049, TC-SEC-018, TC-E2E-005
 github_labels:
   - stage:mvp-2
   - type:test
@@ -4439,7 +4446,7 @@ model_tier: economy
 paired_test_issue: ISS-TEST-045
 paired_code_issue: null
 depends_on: [ISS-CODE-012]
-blocks: [ISS-CODE-052]
+blocks: [ISS-CODE-052, ISS-CODE-058]
 allowed_paths:
   - backend/src/modules/administration-audit/plans/**
   - frontend/src/app/admin/cuentas/**
@@ -4448,7 +4455,7 @@ forbidden_paths:
   - backend/src/modules/organizations/plan-usage/**
 source_refs:
   - SRS: SRS-ADM-008/009
-  - API: listPlans, createPlanVersion, updatePlan, setOrganizationPlan, listOrganizationsForAdmin, exportSubscriptions
+  - API: listPlans, createPlanVersion, updatePlan, setOrganizationPlan, listOrganizationsForAdmin, exportSubscriptions, getOrganizationForAdmin, setOrganizationSuspension
   - DEC: DEC-033
   - UXUI: SCR-057
   - TESTs: TC-API-028/030, TC-INT-010 (EXCLUDE vigencias)
@@ -4525,7 +4532,7 @@ model_tier: frontier
 paired_test_issue: ISS-TEST-046
 paired_code_issue: null
 depends_on: [ISS-CODE-039]
-blocks: []
+blocks: [ISS-CODE-055, ISS-CODE-056, ISS-CODE-060]
 allowed_paths:
   - backend/src/modules/administration-audit/privacy/**
   - backend/src/modules/administration-audit/dashboard/**
@@ -4535,10 +4542,10 @@ allowed_paths:
 forbidden_paths:
   - backend/src/modules/identity-access/**
 source_refs:
-  - SRS: SRS-ADM-007/011/012, SRS-NFR-SEC-009, PRIV-001..008
+  - SRS: SRS-ADM-007/011/012, SRS-NFR-SEC-009, PRIV-001..008, SRS-NFR-PRIV-002, SRS-NFR-PRIV-004, SRS-NFR-PRIV-007, SRS-NFR-PRIV-008
   - DEC: DEC-003/037
   - API: createDataSubjectRequest, listMyDataRequests, listDataSubjectRequests, resolveDataSubjectRequest, setLegalHold, releaseLegalHold, listLegalHolds, searchAuditLogs, getAdminDashboard
-  - UXUI: SCR-041, SCR-064, SCR-065
+  - UXUI: SCR-041, SCR-064, SCR-065, SCR-054
   - TESTs: TC-UNIT-052/053, TC-SEC-024, TC-MT-019 (pe_retention)
 github_labels:
   - stage:mvp-2
@@ -4622,7 +4629,7 @@ forbidden_paths:
   - Tools/dev-stubs/**
   - backend/src/modules/organizations/**
 source_refs:
-  - SRS: SRS-AUTH-003/012, SRS-NFR-SEC-001..003
+  - SRS: SRS-AUTH-003/012, SRS-NFR-SEC-001..003, SRS-AUTH-004, SRS-NFR-SEC-004, SRS-NFR-SEC-006, SRS-NFR-SEC-008, SRS-NFR-SEC-012
   - DEC: DEC-017, TEC-007
   - ADRs: [ADR-SEC-001/002, ADR-STACK-001]
   - TESTs: TC-SEC-001..003, TC-INT-048, TC-SEC-012
@@ -4665,7 +4672,7 @@ allowed_paths:
 forbidden_paths:
   - backend/src/modules/identity-access/auth0/**
 source_refs:
-  - TESTs: TC-SEC-001..003/012, TC-INT-048
+  - TESTs: TC-SEC-001..003/012, TC-INT-048, TC-API-038, TC-SEC-004, TC-SEC-005, TC-SEC-006, TC-SEC-007, TC-SEC-009, TC-SEC-013, TC-SEC-014, TC-SEC-015, TC-SEC-019, TC-SEC-020, TC-SEC-021, TC-SEC-022, TC-SEC-023, TC-SEC-030, TC-SEC-031
 github_labels:
   - stage:mvp-2
   - type:test
@@ -4710,6 +4717,7 @@ source_refs:
   - ADRs: [ADR-TEST-004, ADR-DATA-008, ADR-018]
   - TDD: Sec 5.2 (39 tablas, 7 patrones)
   - TESTs: TC-MT-001..028 (todas), TC-SEC-011
+  - SRS: SRS-NFR-SEC-005
 github_labels:
   - stage:mvp-2
   - type:test
@@ -4835,7 +4843,7 @@ allowed_paths:
 forbidden_paths:
   - backend/src/modules/**
 source_refs:
-  - SRS: SRS-NFR-PERF-001..006, SRS-NFR-OBS-001..006
+  - SRS: SRS-NFR-PERF-001..006, SRS-NFR-OBS-001..006, SRS-NFR-SCAL-001, SRS-NFR-SCAL-002
   - SAD: Sec 12 (SLO y alertas)
   - TESTs: TC-LOAD-001..008 (todos), TC-API-039
 github_labels:
@@ -4886,7 +4894,7 @@ source_refs:
   - SRS: SRS-AUTH-006/007/009/011
   - SAD: Sec 8.2 (job «Expiración de invitaciones y transferencias»)
   - DEC: DEC-008/011
-  - API: inviteCoordinator, acceptInvitation, resendInvitation, revokeInvitation, listCoordinators, listInvitations, updateCoordinator, transferOrganizationOwnership, accept/rejectOwnershipTransfer, getPendingOwnershipTransfer, setUserSuspension, listUsersForAdmin
+  - API: inviteCoordinator, acceptInvitation, resendInvitation, revokeInvitation, listCoordinators, listInvitations, updateCoordinator, transferOrganizationOwnership, acceptOwnershipTransfer, rejectOwnershipTransfer, getPendingOwnershipTransfer, setUserSuspension, listUsersForAdmin
   - UXUI: SCR-036, SCR-037, SCR-009, SCR-010
   - TESTs: TC-UNIT-005..008, TC-CONC-014, TC-MT-026, TC-E2E-015/016/024
 github_labels:
@@ -5015,7 +5023,7 @@ allowed_paths:
 forbidden_paths:
   - backend/src/modules/organizations/plan-usage/**
 source_refs:
-  - TESTs: TC-MT-027, TC-API-027
+  - TESTs: TC-MT-027, TC-API-027, TC-E2E-010
 github_labels:
   - stage:mvp-2
   - type:test
@@ -5029,8 +5037,858 @@ github_labels:
 **Criterios de aceptación:**
 - [ ] Ráfaga de creaciones al borde del límite respeta el número exacto permitido.
 
+### EP-23 — Cierre de cobertura del MVP (brechas RR-04) (Wave-11..Wave-13)
+
+**Objetivo de la épica:** implementar las capacidades exigidas por PRD/SRS, DDD, contrato y UX/UI que ningún Issue de `EP-01..EP-22` cubría, y cerrar las brechas de trazabilidad detectadas por la auditoría cruzada. Es la última épica de `MVP-Stage-2` y no modifica ni reordena nada de `MVP-Stage-1` (DB-14).
+
+**Origen y evidencia:** `ProveeEventos_CrossAudit_Report.md` §5 riesgo **RR-04**; análisis reproducible `Plans/Plan0006_BacklogGaps_work/analiza_huecos.py` (antes del cierre: 34 operaciones netas, 43 requisitos, 11 pantallas, 4 jobs y 28 casos sin cita; tras `G05`/`G06`: **0** brechas fuera de la excepción `cloneEvent`) y clasificación en `Plans/Plan0006_BacklogGaps_work/brechas.md`.
+
+**Excepción documentada:** `cloneEvent` no recibe Issue propio porque FIX-29 la sustituye por `createEvent` con `templateId`; se conserva en el contrato v1.4.0 y queda citada en `ISS-CODE-057` (DB-13, clasificada como `trazabilidad`).
+
+**Historias de usuario:** `US-036` portafolio y paquetes del proveedor · `US-037` taxonomía y plantillas administrables · `US-038` ciclo de vida y equipo del evento · `US-039` panel de la empresa activa · `US-040` superficie pública y páginas legales · `US-041` operación y mantenimiento programado.
+
+**Regla de cierre de la épica:** las 9 parejas `ISS-CODE-053..061` / `ISS-TEST-053..061` en `status:done`, `analiza_huecos.py` sin brechas fuera de las excepciones documentadas y `python3 -I Tools/check_package.py` en 0.
+
+#### ISS-CODE-053: Portafolio multimedia del proveedor
+
+```yaml
 ---
-**Cierre del backlog completo:** **101 Issues** = 52 `ISS-CODE-001..052` (49 con par `ISS-TEST` + 3 Issues de calidad `type:test` con paridad exceptuada y justificada en su propio YAML: la suite de concurrencia `ISS-CODE-026`, la suite multi-tenant `ISS-CODE-048` y la infraestructura de carga `ISS-CODE-050`) + 49 `ISS-TEST-001..052` (la numeración 026/048/050 de la serie TEST queda reservada, ocupada por esos tres Issues en la serie CODE). La paridad CODE↔TEST es 49/49 sobre los Issues de codificación. La fuente autoritativa de conteos es la Sección 8.
+issue_id: ISS-CODE-053
+type: code
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-036
+priority: P1
+estimate: L
+parallel_wave: Wave-11
+coder_role: Backend-Architect-Agent
+tester_role: QA-Integration-Agent
+validator_role: Arch-Reviewer-Agent
+model_tier: frontier
+paired_test_issue: ISS-TEST-053
+paired_code_issue: null
+depends_on: [ISS-CODE-010, ISS-CODE-013]
+blocks: []
+allowed_paths:
+  - backend/src/modules/provider-catalog/media/**
+  - frontend/src/app/proveedor/portafolio/**
+forbidden_paths:
+  - backend/src/modules/provider-catalog/packages/**
+  - backend/src/modules/taxonomy-templates/**
+  - backend/src/shared/security/**
+source_refs:
+  - SRS: SRS-CAT-002, SRS-NFR-SEC-010, SRS-NFR-PRIV-003
+  - DEC: DEC-016
+  - API: createMediaUploadSignature, registerMedia, deleteMedia, reorderMedia, listMyMedia
+  - UXUI: SCR-044
+  - TESTs: TC-INT-047, TC-SEC-016, TC-SEC-025, TC-MT-021, TC-API-011
+github_labels:
+  - stage:mvp-2
+  - type:code
+  - tier:frontier
+  - role:backend-architect
+  - status:backlog
+---
+```
+
+**Objetivo:** portafolio del proveedor con subida firmada a Cloudinary, validación en servidor por *magic bytes*, límites de cantidad y tamaño, orden curado y purga al eliminar.
+**Alcance técnico:** puerto `MediaStorage` en `domain` con adaptador Cloudinary y doble de prueba; firma de subida con *scope* del proveedor y expiración corta (TC-SEC-025); `registerMedia` revalida MIME real, tamaño y autorización antes de persistir el registro (SRS-NFR-SEC-010); `reorderMedia` con `If-Match`; borrado que despublica el recurso y purga en Cloudinary mediante el job `documents` reutilizado.
+**Sincronización:** consume el agregado `ProviderProfile` de `ISS-CODE-010` sin leer sus tablas internas; no toca `provider-catalog/packages/**` (ISS-CODE-054) ni la taxonomía (ISS-CODE-055).
+**Criterios de aceptación:**
+- [ ] TC-INT-047 verde: firma con scope correcto, registro válido, rechazo de SVG con `<script>`, ejecutable renombrado, PDF con payload y `filename` con `../../`.
+- [ ] TC-SEC-025 verde: no se reordena ni elimina portafolio ajeno, firma expirada rechazada, archivo duplicado idempotente.
+- [ ] TC-MT-021 verde: URL firmada de otro tenant/parte no abre.
+- [ ] Límites del PRD aplicados en backend (no solo en UI) y error `VALIDATION_ERROR` por campo en el `problem+json`.
+
+#### ISS-TEST-053: Pruebas de portafolio multimedia
+
+```yaml
+---
+issue_id: ISS-TEST-053
+type: test
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-036
+priority: P1
+estimate: M
+parallel_wave: Wave-11
+coder_role: QA-Integration-Agent
+tester_role: QA-Integration-Agent
+validator_role: QA-Lead-Agent
+model_tier: economy
+paired_test_issue: null
+paired_code_issue: ISS-CODE-053
+depends_on: [ISS-CODE-053]
+blocks: []
+allowed_paths:
+  - backend/src/tests/integration/media/**
+  - backend/src/tests/security/media/**
+  - backend/src/tests/multi-tenant/media/**
+forbidden_paths:
+  - backend/src/modules/provider-catalog/media/**
+source_refs:
+  - TESTs: TC-INT-047, TC-SEC-016, TC-SEC-025, TC-MT-021, TC-API-011
+  - API: createMediaUploadSignature, registerMedia, deleteMedia, reorderMedia, listMyMedia
+github_labels:
+  - stage:mvp-2
+  - type:test
+  - tier:economy
+  - role:qa-integration
+  - status:backlog
+---
+```
+
+**Objetivo:** suite de portafolio con doble de Cloudinary y casos negativos de archivo malicioso.
+**Sincronización:** solo añade archivos bajo `tests/`; no modifica el módulo.
+**Criterios de aceptación:**
+- [ ] TC-SEC-016, TC-SEC-025, TC-MT-021 y TC-INT-047 verdes y citados en el reporte de cobertura.
+- [ ] Sin llamadas de red reales: el adaptador se sustituye por el doble de prueba (SRS-NFR-SCAL-003).
+
+#### ISS-CODE-054: Paquetes de servicio y modalidad de contratación
+
+```yaml
+---
+issue_id: ISS-CODE-054
+type: code
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-036
+priority: P1
+estimate: L
+parallel_wave: Wave-11
+coder_role: Backend-Architect-Agent
+tester_role: QA-Integration-Agent
+validator_role: Arch-Reviewer-Agent
+model_tier: frontier
+paired_test_issue: ISS-TEST-054
+paired_code_issue: null
+depends_on: [ISS-CODE-012, ISS-CODE-013]
+blocks: []
+allowed_paths:
+  - backend/src/modules/provider-catalog/packages/**
+  - frontend/src/app/proveedor/paquetes/**
+forbidden_paths:
+  - backend/src/modules/provider-catalog/media/**
+  - backend/src/modules/availability-booking/**
+  - backend/src/modules/taxonomy-templates/**
+source_refs:
+  - SRS: SRS-CAT-004, SRS-CAT-005, SRS-CAT-006, SRS-CAT-007, SRS-BOOK-003
+  - DEC: DEC-006
+  - API: createPackage, updatePackage, deactivatePackage, getMyPackage, listMyPackages
+  - UXUI: SCR-045/046
+  - TESTs: TC-UNIT-011, TC-UNIT-023, TC-UNIT-032, TC-CONC-011, TC-MT-003, TC-INT-015, TC-API-012
+github_labels:
+  - stage:mvp-2
+  - type:code
+  - tier:frontier
+  - role:backend-architect
+  - status:backlog
+---
+```
+
+**Objetivo:** CRUD de paquetes de servicio por categoría con precio exacto `COP`, capacidad propia del paquete, modalidad `INSTANT_BOOK`/`E_RFQ` y límite de cinco categorías por proveedor.
+**Alcance técnico:** entidad `ServicePackage` con `Money` (decimal exacto, sin flotante) y validación de precio no negativo y dos decimales (`TC-UNIT-011`); unicidad por proveedor + categoría + nombre; `deactivatePackage` bloquea cuando existe contratación vigente y cae a archivado sin reutilización (`TC-UNIT-013` es de taxonomía, no se toca); `updatePackage` con `If-Match` y control optimista (`TC-CONC-011`); el paquete declara su capacidad propia para el inventario independiente de `ConfirmBooking` (`TC-UNIT-032`), sin implementar bloqueo aquí.
+**Sincronización:** expone `listActivePackagesByProvider` para `ISS-CODE-025`; no implementa capacidad ni reservas. Los límites de plan se leen de `ISS-CODE-052` vía interfaz de aplicación (SRS-TEN-003).
+**Criterios de aceptación:**
+- [ ] TC-UNIT-011 y TC-CONC-011 verdes.
+- [ ] TC-MT-003 verde: `updatePackage` de otro tenant responde `404` y deja el recurso intacto.
+- [ ] Un paquete `INSTANT_BOOK` sin capacidad propia declarada se rechaza; `E_RFQ` sin capacidad es válido.
+- [ ] El sexto paquete de una sexta categoría respeta el límite de cinco categorías del proveedor (SRS-CAT-005) con error de dominio explícito.
+
+#### ISS-TEST-054: Pruebas de paquetes y modalidad
+
+```yaml
+---
+issue_id: ISS-TEST-054
+type: test
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-036
+priority: P1
+estimate: M
+parallel_wave: Wave-11
+coder_role: QA-Integration-Agent
+tester_role: QA-Integration-Agent
+validator_role: QA-Lead-Agent
+model_tier: economy
+paired_test_issue: null
+paired_code_issue: ISS-CODE-054
+depends_on: [ISS-CODE-054]
+blocks: []
+allowed_paths:
+  - backend/src/tests/unit/packages/**
+  - backend/src/tests/integration/packages/**
+  - backend/src/tests/multi-tenant/packages/**
+forbidden_paths:
+  - backend/src/modules/provider-catalog/packages/**
+source_refs:
+  - TESTs: TC-UNIT-011, TC-UNIT-032, TC-CONC-011, TC-MT-003, TC-API-012, TC-INT-015
+github_labels:
+  - stage:mvp-2
+  - type:test
+  - tier:economy
+  - role:qa-integration
+  - status:backlog
+---
+```
+
+**Objetivo:** batería de paquetes (precio exacto, modalidad, capacidad propia, aislamiento y optimismo).
+**Sincronización:** no reimplementa `ConfirmBooking`; verifica que el paquete publicado sea consumible por él.
+**Criterios de aceptación:**
+- [ ] TC-UNIT-011, TC-UNIT-032, TC-CONC-011, TC-MT-003 y TC-API-012 verdes.
+- [ ] Caso de regresión: paquete desactivado deja de aparecer en `listActivePackagesByProvider`.
+
+#### ISS-CODE-055: Taxonomía administrable sin despliegue
+
+```yaml
+---
+issue_id: ISS-CODE-055
+type: code
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-037
+priority: P1
+estimate: M
+parallel_wave: Wave-11
+coder_role: Backend-Core-Agent
+tester_role: QA-Integration-Agent
+validator_role: Arch-Reviewer-Agent
+model_tier: economy
+paired_test_issue: ISS-TEST-055
+paired_code_issue: null
+depends_on: [ISS-CODE-012, ISS-CODE-046]
+blocks: []
+allowed_paths:
+  - backend/src/modules/taxonomy-templates/admin/**
+  - frontend/src/app/admin/taxonomia/**
+forbidden_paths:
+  - backend/src/modules/taxonomy-templates/event-templates/**
+  - backend/src/modules/taxonomy-templates/whatsapp/**
+  - backend/src/modules/provider-catalog/**
+source_refs:
+  - SRS: SRS-ADM-002, SRS-NFR-SCAL-006, SRS-CAT-003, SRS-CAT-004
+  - DEC: DEC-020
+  - API: createCategory, updateCategory, listCategoriesForAdmin, updateSubtype
+  - UXUI: SCR-058
+  - TESTs: TC-UNIT-013, TC-API-028, TC-API-031
+github_labels:
+  - stage:mvp-2
+  - type:code
+  - tier:economy
+  - role:backend-core
+  - status:backlog
+---
+```
+
+**Objetivo:** alta y edición de categorías y subtipos desde el panel admin, con efecto inmediato en el catálogo público y sin despliegue (SRS-NFR-SCAL-006).
+**Alcance técnico:** guardas de integridad taxonómica (`TC-UNIT-013`): desactivar una categoría con paquetes activos exige archivado, nunca borrado ni reutilización de identificadores; `updateSubtype` valida que no queden proveedores huérfanos; toda mutación registra auditoría con `ISS-CODE-046`; el orden de presentación es explícito y estable.
+**Sincronización:** la caché de `ISS-CODE-013` se invalida por evento `TaxonomyChanged`; no escribe en `provider-catalog`.
+**Criterios de aceptación:**
+- [ ] TC-UNIT-013 verde: categoría con paquetes activos no se elimina.
+- [ ] TC-API-028 verde: rol `COORDINADOR` y `PROVEEDOR` reciben `403`/`404` en `/admin/*`.
+- [ ] Cambio de categoría visible en `listCategories` público sin reinicio ni despliegue.
+- [ ] Toda mutación queda en el log de auditoría con actor, antes y después.
+
+#### ISS-TEST-055: Pruebas de taxonomía administrable
+
+```yaml
+---
+issue_id: ISS-TEST-055
+type: test
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-037
+priority: P1
+estimate: S
+parallel_wave: Wave-11
+coder_role: QA-Integration-Agent
+tester_role: QA-Integration-Agent
+validator_role: QA-Lead-Agent
+model_tier: economy
+paired_test_issue: null
+paired_code_issue: ISS-CODE-055
+depends_on: [ISS-CODE-055]
+blocks: []
+allowed_paths:
+  - backend/src/tests/unit/taxonomy/**
+  - backend/src/tests/integration/taxonomy/**
+forbidden_paths:
+  - backend/src/modules/taxonomy-templates/admin/**
+source_refs:
+  - TESTs: TC-UNIT-013, TC-API-028, TC-API-031
+github_labels:
+  - stage:mvp-2
+  - type:test
+  - tier:economy
+  - role:qa-integration
+  - status:backlog
+---
+```
+
+**Objetivo:** integridad taxonómica, BFLA de admin y catálogo público sin contacto.
+**Sincronización:** reutiliza el sembrado `seedReferenceData()` de 21 categorías (DEC-020).
+**Criterios de aceptación:**
+- [ ] TC-UNIT-013, TC-API-028 y TC-API-031 verdes.
+- [ ] Sin regresiones en `ISS-TEST-012` (aprobación admin-lite).
+
+#### ISS-CODE-056: Plantillas de evento propias y globales
+
+```yaml
+---
+issue_id: ISS-CODE-056
+type: code
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-037
+priority: P1
+estimate: M
+parallel_wave: Wave-11
+coder_role: Backend-Core-Agent
+tester_role: QA-Integration-Agent
+validator_role: Arch-Reviewer-Agent
+model_tier: economy
+paired_test_issue: ISS-TEST-056
+paired_code_issue: null
+depends_on: [ISS-CODE-020, ISS-CODE-046]
+blocks: []
+allowed_paths:
+  - backend/src/modules/taxonomy-templates/event-templates/**
+  - frontend/src/app/(app)/app/plantillas/**
+  - frontend/src/app/admin/plantillas-eventos/**
+forbidden_paths:
+  - backend/src/modules/taxonomy-templates/admin/**
+  - backend/src/modules/quotation/**
+  - backend/src/modules/event-management/**
+source_refs:
+  - SRS: SRS-EVT-002, SRS-EVT-003, SRS-EVT-004, SRS-ADM-003
+  - DEC: DEC-020
+  - API: getEventTemplate, updateEventTemplate, createGlobalEventTemplate, updateGlobalEventTemplate
+  - UXUI: SCR-033, SCR-059
+  - TESTs: TC-E2E-002, TC-API-028, TC-MT-003
+github_labels:
+  - stage:mvp-2
+  - type:code
+  - tier:economy
+  - role:backend-core
+  - status:backlog
+---
+```
+
+**Objetivo:** editor completo de plantilla propia (SCR-033) y gestión de plantillas globales de plataforma (SCR-059), con rubros por categoría y sin despliegue (SRS-NFR-SCAL-006).
+**Alcance técnico:** `EventTemplate` con `TemplateCategory` y `TemplateRubro`; la plantilla es del tenant y las globales son de plataforma (`AP`), nunca editables por una organización; `updateEventTemplate` con `If-Match` sobre plantillas propias y `updateGlobalEventTemplate` restringido a `ADMIN_PLATAFORMA`; cambio de plantilla global no reescribe eventos ya creados (snapshot, DEC-018); toda mutación audita.
+**Sincronización:** extiende lo entregado en `ISS-CODE-020` (versión mínima de Stage 1) sin alterar `ISS-CODE-021`; `ISS-CODE-057` consume las plantillas para crear eventos.
+**Criterios de aceptación:**
+- [ ] TC-E2E-002 verde: plantilla → evento → cotización conserva rubros y montos.
+- [ ] TC-API-028 verde: roles no administradores no pueden escribir plantillas globales.
+- [ ] TC-MT-003 verde: plantilla de otra organización responde `404` y el recurso queda intacto.
+- [ ] Editar una plantilla global no modifica eventos ya creados (verificado por snapshot).
+
+#### ISS-TEST-056: Pruebas de plantillas de evento
+
+```yaml
+---
+issue_id: ISS-TEST-056
+type: test
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-037
+priority: P1
+estimate: S
+parallel_wave: Wave-11
+coder_role: QA-Integration-Agent
+tester_role: QA-Integration-Agent
+validator_role: QA-Lead-Agent
+model_tier: economy
+paired_test_issue: null
+paired_code_issue: ISS-CODE-056
+depends_on: [ISS-CODE-056]
+blocks: []
+allowed_paths:
+  - backend/src/tests/integration/event-templates/**
+  - backend/src/tests/multi-tenant/event-templates/**
+forbidden_paths:
+  - backend/src/modules/taxonomy-templates/event-templates/**
+source_refs:
+  - TESTs: TC-E2E-002, TC-API-028, TC-MT-003
+github_labels:
+  - stage:mvp-2
+  - type:test
+  - tier:economy
+  - role:qa-integration
+  - status:backlog
+---
+```
+
+**Objetivo:** cubrir plantillas propias, globales, aislamiento y no reescritura de eventos existentes.
+**Criterios de aceptación:**
+- [ ] TC-E2E-002, TC-API-028 y TC-MT-003 verdes sobre plantillas.
+- [ ] Caso negativo: `ADMIN_EMPRESA` intenta `updateGlobalEventTemplate` y recibe `403`.
+
+#### ISS-CODE-057: Detalle, ciclo de vida y equipo del evento
+
+```yaml
+---
+issue_id: ISS-CODE-057
+type: code
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-038
+priority: P0
+estimate: L
+parallel_wave: Wave-12
+coder_role: Backend-Architect-Agent
+tester_role: QA-E2E-Agent
+validator_role: Arch-Reviewer-Agent
+model_tier: frontier
+paired_test_issue: ISS-TEST-057
+paired_code_issue: null
+depends_on: [ISS-CODE-014, ISS-CODE-015]
+blocks: [ISS-CODE-060]
+allowed_paths:
+  - backend/src/modules/event-management/lifecycle/**
+  - frontend/src/app/(app)/app/eventos/**
+forbidden_paths:
+  - backend/src/modules/availability-booking/**
+  - backend/src/modules/rfq-offers/**
+  - backend/src/modules/quotation/**
+source_refs:
+  - SRS: SRS-EVT-005, SRS-EVT-006, SRS-EVT-007, SRS-EVT-008, SRS-AUTH-011, SRS-TEN-002, SRS-BOOK-008
+  - DEC: DEC-023, DEC-018
+  - API: transitionEventStatus, reactivateEvent, getEventAssignees, setEventAssignees
+  - UXUI: SCR-016, SCR-017
+  - TESTs: TC-API-024, TC-E2E-014, TC-E2E-023, TC-MT-003
+github_labels:
+  - stage:mvp-2
+  - type:code
+  - tier:frontier
+  - role:backend-architect
+  - status:backlog
+---
+```
+
+**Objetivo:** pantalla de detalle y edición del evento, máquina de estados completa (DEC-023), reapertura controlada, asignación a coordinador restringido y reglas de edición con compromisos vigentes.
+**Alcance técnico:** grafo de transiciones de SRS §9.2/DEC-023 en `domain` — sin consultar Prisma; `COMPLETADO` no vuelve a `EN_PROGRESO` (`TC-API-024`); `reactivateEvent` es la única ruta de reversión y exige motivo auditado; `setEventAssignees` limita a `COORDINADOR_RESTRINGIDO` los eventos asignados (SRS-AUTH-011) y verifica pertenencia al tenant (SRS-TEN-002); editar un evento con contrataciones usa el flujo de compromisos de SRS-EVT-008 sin cancelar en silencio.
+**Sincronización:** *clonar evento* se resuelve con `createEvent` + `templateId` (FIX-29), ya previsto en `ISS-CODE-014`; este Issue no modifica `availability-booking` ni `rfq-offers`. Los jobs de borradores inactivos viven en `ISS-CODE-060`.
+**Criterios de aceptación:**
+- [ ] TC-API-024 verde: `COMPLETADO → EN_PROGRESO` rechazado; edición con `ETag` desactualizado rechazada.
+- [ ] TC-E2E-014 verde: `SERVICIO_REALIZADO` por proveedor y `COMPLETADO` automático a los 5 días (DEC-002).
+- [ ] TC-E2E-023 verde: estados vacío/error/sin permiso de SCR-016.
+- [ ] Un `COORDINADOR_RESTRINGIDO` no asignado recibe `403` en el detalle del evento (TC-MT-003 ampliado).
+
+#### ISS-TEST-057: Pruebas de ciclo de vida y equipo del evento
+
+```yaml
+---
+issue_id: ISS-TEST-057
+type: test
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-038
+priority: P0
+estimate: M
+parallel_wave: Wave-12
+coder_role: QA-E2E-Agent
+tester_role: QA-E2E-Agent
+validator_role: QA-Lead-Agent
+model_tier: frontier
+paired_test_issue: null
+paired_code_issue: ISS-CODE-057
+depends_on: [ISS-CODE-057]
+blocks: []
+allowed_paths:
+  - backend/src/tests/integration/event-lifecycle/**
+  - backend/src/tests/e2e/event-lifecycle/**
+forbidden_paths:
+  - backend/src/modules/event-management/lifecycle/**
+source_refs:
+  - TESTs: TC-API-024, TC-E2E-014, TC-E2E-023, TC-E2E-024, TC-MT-003, TC-INT-025
+github_labels:
+  - stage:mvp-2
+  - type:test
+  - tier:frontier
+  - role:qa-e2e
+  - status:backlog
+---
+```
+
+**Objetivo:** matriz completa de transiciones y RBAC del evento en UI y API.
+**Criterios de aceptación:**
+- [ ] Todas las transiciones de DEC-023 probadas, incluida la prohibida.
+- [ ] TC-E2E-024 verde: URL directa de SCR-016/017 con cada rol de la matriz.
+
+#### ISS-CODE-058: Datos, plan y consumo de la empresa activa
+
+```yaml
+---
+issue_id: ISS-CODE-058
+type: code
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-039
+priority: P1
+estimate: M
+parallel_wave: Wave-12
+coder_role: Frontend-App-Agent
+tester_role: QA-Integration-Agent
+validator_role: Arch-Reviewer-Agent
+model_tier: economy
+paired_test_issue: ISS-TEST-058
+paired_code_issue: null
+depends_on: [ISS-CODE-008, ISS-CODE-045]
+blocks: []
+allowed_paths:
+  - backend/src/modules/organizations/current/**
+  - frontend/src/app/(app)/app/empresa/**
+forbidden_paths:
+  - backend/src/modules/administration-audit/**
+  - backend/src/modules/identity-access/**
+source_refs:
+  - SRS: SRS-TEN-001, SRS-TEN-003, SRS-TEN-004, SRS-TEN-005
+  - DEC: DEC-029, DEC-018
+  - API: getCurrentOrganization, updateCurrentOrganization, getPlanUsage, listPlans
+  - UXUI: SCR-035
+  - TESTs: TC-E2E-020, TC-API-006, TC-API-027
+github_labels:
+  - stage:mvp-2
+  - type:code
+  - tier:economy
+  - role:frontend-app
+  - status:backlog
+---
+```
+
+**Objetivo:** pantalla `/app/empresa` con datos de la empresa, plan vigente y consumo de límites, editable solo por `PROPIETARIO` y `ADMIN_EMPRESA`.
+**Alcance técnico:** lectura de la organización activa vía `X-Organization-Id` (TEC-006) sin permitir cambiar el tenant por parámetro; edición de datos con `If-Match` y auditoría; consumo proveniente de `ISS-CODE-052` (`getPlanUsage`) en solo lectura; el estado de plan (`PRUEBA`, vencido, excedido) se muestra con semántica no bloqueante, y el bloqueo real de acciones sigue en backend (SRS-TEN-004).
+**Sincronización:** no implementa la facturación ni el cambio de plan (eso es `ISS-CODE-045`); no toca invitaciones (`ISS-CODE-051`).
+**Criterios de aceptación:**
+- [ ] TC-E2E-020 verde: el cambio de organización activa refresca datos, plan y consumo sin recargar la sesión.
+- [ ] TC-API-006 verde: sin cabecera y con cabecera ajena se rechaza la operación.
+- [ ] `COORDINADOR` y `COORDINADOR_RESTRINGIDO` ven la pantalla en modo lectura y reciben `403` al editar.
+
+#### ISS-TEST-058: Pruebas de empresa activa, plan y consumo
+
+```yaml
+---
+issue_id: ISS-TEST-058
+type: test
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-039
+priority: P1
+estimate: S
+parallel_wave: Wave-12
+coder_role: QA-Integration-Agent
+tester_role: QA-Integration-Agent
+validator_role: QA-Lead-Agent
+model_tier: economy
+paired_test_issue: null
+paired_code_issue: ISS-CODE-058
+depends_on: [ISS-CODE-058]
+blocks: []
+allowed_paths:
+  - backend/src/tests/integration/organizations/current/**
+  - backend/src/tests/multi-tenant/organizations-current/**
+forbidden_paths:
+  - backend/src/modules/organizations/current/**
+source_refs:
+  - TESTs: TC-E2E-020, TC-API-006, TC-API-027
+github_labels:
+  - stage:mvp-2
+  - type:test
+  - tier:economy
+  - role:qa-integration
+  - status:backlog
+---
+```
+
+**Objetivo:** cubrir datos de empresa, cambio de organización activa y lectura de consumo.
+**Criterios de aceptación:**
+- [ ] TC-E2E-020, TC-API-006 y TC-API-027 verdes.
+- [ ] El consumo mostrado coincide con el contador atómico de `ISS-CODE-052` tras operaciones concurrentes.
+
+#### ISS-CODE-059: Superficie pública, documentos legales y páginas de sistema
+
+```yaml
+---
+issue_id: ISS-CODE-059
+type: code
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-040
+priority: P1
+estimate: M
+parallel_wave: Wave-12
+coder_role: Frontend-App-Agent
+tester_role: QA-E2E-Agent
+validator_role: QA-Lead-Agent
+model_tier: frontier
+paired_test_issue: ISS-TEST-059
+paired_code_issue: null
+depends_on: [ISS-CODE-006, ISS-CODE-009]
+blocks: []
+allowed_paths:
+  - frontend/src/app/(public)/**
+  - frontend/src/app/(system)/**
+  - frontend/src/components/marketing/**
+forbidden_paths:
+  - frontend/src/app/(app)/**
+  - frontend/src/app/proveedor/**
+  - frontend/src/app/admin/**
+source_refs:
+  - SRS: SRS-NFR-PRIV-001, SRS-NFR-COMP-001, SRS-NFR-COMP-002, SRS-NFR-COMP-003
+  - DEC: DEC-019
+  - API: listCategories, listPublicPlans, getPublicProvider
+  - UXUI: SCR-001, SCR-004, SCR-011
+  - TESTs: TC-E2E-013, TC-E2E-021, TC-E2E-026, TC-E2E-028
+github_labels:
+  - stage:mvp-2
+  - type:code
+  - tier:frontier
+  - role:frontend-app
+  - status:backlog
+---
+```
+
+**Objetivo:** landing pública con categorías y planes, documentos legales versionados y páginas de sistema (403, 404, error, sin conexión), en el shell público con `SEO` básico y presupuesto de rendimiento.
+**Alcance técnico:** rutas de `/` y `/legal/{documento}` renderizadas del lado servidor; el contenido legal se sirve por documento versionado y se enlaza al consentimiento registrado (SRS-NFR-PRIV-001, SRS-NFR-PRIV-006); SCR-011 implementa las cuatro variantes con el mismo `ErrorState` y sin filtrar detalles técnicos; la landing no llama a la API con token (no hay sesión) y cumple `TC-E2E-026` (Lighthouse móvil 4G) y `TC-E2E-021` (axe-core).
+**Sincronización:** no duplica el catálogo público de `ISS-CODE-013`; consume sus operaciones. No toca el shell autenticado de `ISS-CODE-009`.
+**Criterios de aceptación:**
+- [ ] TC-E2E-013 verde desde SCR-001: filtros en URL compartible y navegación a detalle público.
+- [ ] TC-E2E-021 y TC-E2E-026 verdes en SCR-001 (axe-core sin violaciones graves, presupuesto de Lighthouse cumplido).
+- [ ] TC-E2E-028 verde: recorrido manual asistido de SCR-004 y SCR-011 con NVDA/`VoiceOver`.
+- [ ] Ningún documento legal ni página de error muestra datos personales ni trazas (SRS-NFR-PRIV-005, SRS-NFR-SEC-011).
+
+#### ISS-TEST-059: Pruebas de superficie pública y páginas de sistema
+
+```yaml
+---
+issue_id: ISS-TEST-059
+type: test
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-040
+priority: P1
+estimate: M
+parallel_wave: Wave-12
+coder_role: QA-E2E-Agent
+tester_role: QA-E2E-Agent
+validator_role: QA-Lead-Agent
+model_tier: frontier
+paired_test_issue: null
+paired_code_issue: ISS-CODE-059
+depends_on: [ISS-CODE-059]
+blocks: []
+allowed_paths:
+  - frontend/src/tests/e2e/public/**
+  - frontend/src/tests/a11y/public/**
+forbidden_paths:
+  - frontend/src/app/(public)/**
+  - frontend/src/app/(system)/**
+source_refs:
+  - TESTs: TC-E2E-013, TC-E2E-021, TC-E2E-026, TC-E2E-028
+  - UXUI: SCR-001, SCR-004, SCR-011
+github_labels:
+  - stage:mvp-2
+  - type:test
+  - tier:frontier
+  - role:qa-e2e
+  - status:backlog
+---
+```
+
+**Objetivo:** E2E, accesibilidad automatizada y manual, y presupuesto de rendimiento de la superficie pública.
+**Criterios de aceptación:**
+- [ ] TC-E2E-013, TC-E2E-021, TC-E2E-026 y TC-E2E-028 verdes en Chromium, Firefox y WebKit.
+- [ ] Las cuatro variantes de SCR-011 se alcanzan de forma determinista en la prueba (404, 403, error de cliente, sin conexión).
+
+#### ISS-CODE-060: Jobs de `scheduler` y `maintenance`
+
+```yaml
+---
+issue_id: ISS-CODE-060
+type: code
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-041
+priority: P1
+estimate: M
+parallel_wave: Wave-13
+coder_role: Backend-Core-Agent
+tester_role: QA-Integration-Agent
+validator_role: Arch-Reviewer-Agent
+model_tier: economy
+paired_test_issue: ISS-TEST-060
+paired_code_issue: null
+depends_on: [ISS-CODE-027, ISS-CODE-041, ISS-CODE-046, ISS-CODE-057]
+blocks: []
+allowed_paths:
+  - backend/src/jobs/scheduler/**
+  - backend/src/jobs/maintenance/**
+forbidden_paths:
+  - backend/src/jobs/rfq-sla/**
+  - backend/src/jobs/outbox/**
+  - backend/src/modules/**
+source_refs:
+  - SRS: SRS-NOT-001, SRS-REV-008, SRS-EVT-007, SRS-ADM-012
+  - SAD: Sec 8.2 (jobs «Recordatorio de evento próximo», «Aviso de calificación», «Borradores inactivos», «Purga por retención»), Sec 7.4
+  - DEC: DEC-002, DEC-003
+  - TESTs: TC-INT-038, TC-UNIT-052, TC-E2E-017
+github_labels:
+  - stage:mvp-2
+  - type:code
+  - tier:economy
+  - role:backend-core
+  - status:backlog
+---
+```
+
+**Objetivo:** implementar los cuatro jobs de SAD §8.2 que ningún Issue cubría: recordatorio de evento próximo, aviso de calificación, borradores inactivos y purga por retención.
+**Alcance técnico:** cada job es un consumidor idempotente de su cola, con clave de deduplicación estable (`bookingId`+tipo, `eventId`+día) y fecha de referencia leída de PostgreSQL, nunca del reloj del proceso; un job ejecutado tarde **no** altera solicitudes ni eventos ya terminales (SAD §8.2); borradores: aviso a los 83 días y `archivedAt` a los 90 (SRS-EVT-007); purga: respeta categoría de retención y `LegalHold` (TC-UNIT-052, DEC-003) y usa el usuario `pe_retention`; recordatorios y avisos se materializan como filas de outbox/notificación, no como envío directo.
+**Sincronización:** los jobs de `rfq-sla` (expiración, vencimiento de ofertas, cierre automático) pertenecen a `ISS-CODE-027` y no se modifican; `ISS-CODE-041` aporta el modelo de notificación y `ISS-CODE-046` el `LegalHold`. El registro de los 12 jobs en el arranque del worker debe seguir enumerándolos por nombre exacto para `TC-INT-038`.
+**Criterios de aceptación:**
+- [ ] TC-INT-038 verde con los cuatro nombres exactos de job y su condición de disparo.
+- [ ] TC-UNIT-052 verde: recurso con `legal_hold` activo no se purga.
+- [ ] Ejecutar dos veces el mismo job no duplica avisos ni recordatorios (idempotencia verificada).
+- [ ] Job con reloj adelantado no cambia el estado de un evento `ARCHIVADO` ni de una contratación terminal.
+
+#### ISS-TEST-060: Pruebas de jobs de `scheduler` y `maintenance`
+
+```yaml
+---
+issue_id: ISS-TEST-060
+type: test
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-041
+priority: P1
+estimate: S
+parallel_wave: Wave-13
+coder_role: QA-Integration-Agent
+tester_role: QA-Integration-Agent
+validator_role: QA-Lead-Agent
+model_tier: economy
+paired_test_issue: null
+paired_code_issue: ISS-CODE-060
+depends_on: [ISS-CODE-060]
+blocks: []
+allowed_paths:
+  - backend/src/tests/integration/jobs/scheduler/**
+  - backend/src/tests/integration/jobs/maintenance/**
+forbidden_paths:
+  - backend/src/jobs/scheduler/**
+  - backend/src/jobs/maintenance/**
+source_refs:
+  - TESTs: TC-INT-038, TC-UNIT-052, TC-E2E-017
+github_labels:
+  - stage:mvp-2
+  - type:test
+  - tier:economy
+  - role:qa-integration
+  - status:backlog
+---
+```
+
+**Objetivo:** cubrir los cuatro jobs con reloj congelado y doble ejecución.
+**Criterios de aceptación:**
+- [ ] TC-INT-038 verde para los cuatro jobs añadidos, sin romper los ocho restantes.
+- [ ] TC-UNIT-052 y TC-E2E-017 verdes (purga con retención y notificaciones con preferencias desactivadas).
+
+#### ISS-CODE-061: Operación — backups, restauración y persistencia de colas
+
+```yaml
+---
+issue_id: ISS-CODE-061
+type: code
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-041
+priority: P1
+estimate: M
+parallel_wave: Wave-13
+coder_role: DevOps-Container-Agent
+tester_role: QA-Integration-Agent
+validator_role: Arch-Reviewer-Agent
+model_tier: frontier
+paired_test_issue: ISS-TEST-061
+paired_code_issue: null
+depends_on: [ISS-CODE-002, ISS-CODE-004, ISS-CODE-006]
+blocks: []
+allowed_paths:
+  - infra/ops/**
+  - scripts/ops/**
+  - docs/runbooks/**
+forbidden_paths:
+  - backend/src/modules/**
+  - frontend/src/**
+  - docker-compose.yml
+source_refs:
+  - SRS: SRS-NFR-AVL-001, SRS-NFR-AVL-002, SRS-NFR-AVL-003, SRS-NFR-AVL-004, SRS-NFR-AVL-005
+  - SAD: Sec 8.2 (persistencia de colas), Sec 7.4 (reconciliación del Outbox tras restauración)
+  - CICD: G-17 (respaldo/restauración), nightly
+  - TESTs: TC-INT-032
+github_labels:
+  - stage:mvp-2
+  - type:code
+  - tier:frontier
+  - role:devops-container
+  - status:backlog
+---
+```
+
+**Objetivo:** política de respaldo automático diario, restauración PITR probada con RTO ≤ 4 h y RPO ≤ 1 h, procedimiento post-restauración y colas recuperables tras reinicio.
+**Alcance técnico:** script de respaldo (`scripts/ops/`) y de restauración con verificación de integridad; runbook en `docs/runbooks/` con pasos, responsables y ventana; post-restauración ejecuta la reconciliación del Outbox (`PUBLICADO` recientes < 24 h → `PENDIENTE`) y verifica contadores de capacidad contra las contrataciones (`TC-INT-032`); Redis configurado con persistencia y reencolado desde el outbox para las siete colas de SAD §8.2, de modo que una tarea crítica no se pierda al reiniciar el worker; define la comprobación periódica de restauración y su registro como evidencia de `G-17`.
+**Sincronización:** no modifica la aplicación; consume los scripts de `ISS-CODE-004` y la topología de `ISS-CODE-002`. La observabilidad de `ISS-CODE-050` no se toca.
+**Criterios de aceptación:**
+- [ ] TC-INT-032 verde en un entorno restaurado: eventos `PUBLICADO` recientes vuelven a `PENDIENTE` y se republican sin duplicar efectos.
+- [ ] Restauración completa ejecutada de principio a fin dentro del RTO declarado y con evidencia adjunta al runbook.
+- [ ] Reinicio del worker con tareas en vuelo no pierde ninguna tarea crítica (verificado por conteo antes/después).
+- [ ] El runbook cubre también el escenario de pérdida total de Redis.
+
+#### ISS-TEST-061: Pruebas de restauración y persistencia de colas
+
+```yaml
+---
+issue_id: ISS-TEST-061
+type: test
+stage: MVP-Stage-2
+epic_id: EP-23
+story_id: US-041
+priority: P1
+estimate: S
+parallel_wave: Wave-13
+coder_role: QA-Integration-Agent
+tester_role: QA-Integration-Agent
+validator_role: QA-Lead-Agent
+model_tier: economy
+paired_test_issue: null
+paired_code_issue: ISS-CODE-061
+depends_on: [ISS-CODE-061]
+blocks: []
+allowed_paths:
+  - backend/src/tests/integration/ops/restore/**
+forbidden_paths:
+  - infra/ops/**
+  - scripts/ops/**
+source_refs:
+  - TESTs: TC-INT-032, TC-INT-041
+  - SRS: SRS-NFR-AVL-004, SRS-NFR-AVL-005
+github_labels:
+  - stage:mvp-2
+  - type:test
+  - tier:economy
+  - role:qa-integration
+  - status:backlog
+---
+```
+
+**Objetivo:** prueba automatizable del procedimiento de restauración y de la reconciliación posterior.
+**Criterios de aceptación:**
+- [ ] TC-INT-032 verde de forma reproducible contra el entorno de pruebas.
+- [ ] Ausencia de efectos duplicados: cada evento del outbox reconciliado se publica una sola vez.
+
+---
+
+**Cierre del backlog completo:** **119 Issues** = 61 `ISS-CODE` (58 con par `ISS-TEST` + 3 Issues de calidad `type:test` con paridad exceptuada y justificada en su propio YAML) + 58 `ISS-TEST`. La paridad CODE↔TEST es 58/58 sobre los Issues de codificación, con las excepciones `ISS-CODE-026/048/050` documentadas. La fuente autoritativa de conteos es la Sección 8.
 
 ## Sección 8 — Matriz Resumen de Pares (Codificación ↔ Pruebas) y Estimaciones
 
@@ -5088,16 +5946,25 @@ github_labels:
 | MVP-Stage-2 | Wave-10 | EP-20 | ISS-CODE-050 | — (self-test) | P1 | L | frontier | Backend-Architect-Agent | QA-Perf-Agent | Arch-Reviewer-Agent | [ISS-CODE-025, ISS-CODE-030, ISS-CODE-036, ISS-CODE-037, ISS-CODE-042] |
 | MVP-Stage-2 | Wave-6 | EP-21 | ISS-CODE-051 | ISS-TEST-051 | P1 | M | economy | Backend-Core-Agent | QA-Integration-Agent | Arch-Reviewer-Agent | [ISS-CODE-008] |
 | MVP-Stage-2 | Wave-7 | EP-22 | ISS-CODE-052 | ISS-TEST-052 | P1 | M | economy | Backend-Core-Agent | QA-Integration-Agent | Arch-Reviewer-Agent | [ISS-CODE-008, ISS-CODE-045] |
+| MVP-Stage-2 | Wave-11 | ISS-CODE-053 | ISS-TEST-053 | P1 | L | frontier | Backend-Architect-Agent | QA-Integration-Agent | Arch-Reviewer-Agent | [ISS-CODE-010, ISS-CODE-013] |
+| MVP-Stage-2 | Wave-11 | ISS-CODE-054 | ISS-TEST-054 | P1 | L | frontier | Backend-Architect-Agent | QA-Integration-Agent | Arch-Reviewer-Agent | [ISS-CODE-012, ISS-CODE-013] |
+| MVP-Stage-2 | Wave-11 | ISS-CODE-055 | ISS-TEST-055 | P1 | M | economy | Backend-Core-Agent | QA-Integration-Agent | Arch-Reviewer-Agent | [ISS-CODE-012, ISS-CODE-046] |
+| MVP-Stage-2 | Wave-11 | ISS-CODE-056 | ISS-TEST-056 | P1 | M | economy | Backend-Core-Agent | QA-Integration-Agent | Arch-Reviewer-Agent | [ISS-CODE-020, ISS-CODE-046] |
+| MVP-Stage-2 | Wave-12 | ISS-CODE-057 | ISS-TEST-057 | P0 | L | frontier | Backend-Architect-Agent | QA-E2E-Agent | Arch-Reviewer-Agent | [ISS-CODE-014, ISS-CODE-015] |
+| MVP-Stage-2 | Wave-12 | ISS-CODE-058 | ISS-TEST-058 | P1 | M | economy | Frontend-App-Agent | QA-Integration-Agent | Arch-Reviewer-Agent | [ISS-CODE-008, ISS-CODE-045] |
+| MVP-Stage-2 | Wave-12 | ISS-CODE-059 | ISS-TEST-059 | P1 | M | frontier | Frontend-App-Agent | QA-E2E-Agent | QA-Lead-Agent | [ISS-CODE-006, ISS-CODE-009] |
+| MVP-Stage-2 | Wave-13 | ISS-CODE-060 | ISS-TEST-060 | P1 | M | economy | Backend-Core-Agent | QA-Integration-Agent | Arch-Reviewer-Agent | [ISS-CODE-027, ISS-CODE-041, ISS-CODE-046, ISS-CODE-057] |
+| MVP-Stage-2 | Wave-13 | ISS-CODE-061 | ISS-TEST-061 | P1 | M | frontier | DevOps-Container-Agent | QA-Integration-Agent | Arch-Reviewer-Agent | [ISS-CODE-002, ISS-CODE-004, ISS-CODE-006] |
 
 **Totales por Etapa** (conversión horaria de la escala: XS = 1.5 h · S = 3 h · M = 6 h · L = 1.5 d = 12 h; los conteos de Modelo corresponden a los Issues CODE de la matriz):
 
 | Etapa | Pares CODE↔TEST | Issues CODE | XS | S | M | L | Horas (CODE) | Frontier | Economy |
 |---|---|---|---|---|---|---|---|---|---|
 | **MVP-Stage-1** | 24 | 24 | 0 | 4 | 11 | 9 | 186 h | 13 | 11 |
-| **MVP-Stage-2** | 25 | 28 | 0 | 0 | 18 | 10 | 228 h | 13 | 15 |
-| **Total MVP** | **49** | **52** | **0** | **4** | **29** | **19** | **414 h** | **26** | **26** |
+| **MVP-Stage-2** | 34 | 37 | 0 | 0 | 24 | 13 | 300 h | 18 | 19 |
+| **Total MVP** | **58** | **61** | **0** | **4** | **35** | **22** | **486 h** | **31** | **30** |
 
-Nota: la columna «Pares CODE↔TEST» cuenta las filas con par explícito `ISS-TEST` (24 + 25 = 49 pares, paridad 49/49); las 3 filas restantes son los Issues de calidad con paridad exceptuada (`ISS-CODE-026`, `ISS-CODE-048`, `ISS-CODE-050`, marcados «— (self-test)»).
+Nota: la columna «Pares CODE↔TEST» cuenta las filas con par explícito `ISS-TEST` (24 + 34 = 58 pares, paridad 58/58); las 3 filas restantes son los Issues de calidad con paridad exceptuada (`ISS-CODE-026`, `ISS-CODE-048`, `ISS-CODE-050`, marcados «— (self-test)»).
 
 **Leyenda de estimaciones (escala del documento):** XS = 1-2 h · S = 2-4 h · M = 4-8 h · L = 1-2 d.
 
@@ -5115,7 +5982,7 @@ Nota: la columna «Pares CODE↔TEST» cuenta las filas con par explícito `ISS-
 7. Templates de presupuesto (6 predefinidas) → evento multi-ítem → lanzamiento grupal → adjudicación por rubro.
 8. Smoke E2E automatizado de los 2 recorridos demo + runbook y Makefile.
 
-**MVP Etapa 2 — MVP completo (hitos M5–M6, 28 pares, ~228 h):** Instant Book con capacidad dos niveles; RFQ completo (SLA/jobs, revisiones, rondas, portal proveedor); cotización integral con versiones/PDF/tracking; disponibilidad con bloqueos y propuestas de cambio; cancelaciones por etapas con disputas y comisiones admin; reseñas B2B con moderación; verificación por niveles y suspensión con revisión; notificaciones in-app + webhook SendGrid; WhatsApp Click-to-Chat + asistente asistido; administración completa (planes, exportaciones, datos personales con legal holds, auditoría, dashboard); Auth0 real + MFA; RLS verificada en CI con suites `TC-MT`/`TC-CONC` bloqueantes; accesibilidad WCAG 2.1 AA completa; carga k6 + observabilidad con alertas; membresías avanzadas y transferencia de propiedad; límites de plan.
+**MVP Etapa 2 — MVP completo (hitos M5–M6, 34 pares, ~300 h):** Instant Book con capacidad dos niveles; RFQ completo (SLA/jobs, revisiones, rondas, portal proveedor); cotización integral con versiones/PDF/tracking; disponibilidad con bloqueos y propuestas de cambio; cancelaciones por etapas con disputas y comisiones admin; reseñas B2B con moderación; verificación por niveles y suspensión con revisión; notificaciones in-app + webhook SendGrid; WhatsApp Click-to-Chat + asistente asistido; administración completa (planes, exportaciones, datos personales con legal holds, auditoría, dashboard); Auth0 real + MFA; RLS verificada en CI con suites `TC-MT`/`TC-CONC` bloqueantes; accesibilidad WCAG 2.1 AA completa; carga k6 + observabilidad con alertas; membresías avanzadas y transferencia de propiedad; límites de plan; y, desde el **cierre de cobertura `EP-23`** (Wave-11..13, `ISS-CODE-053..061`, riesgo **RR-04**), portafolio multimedia del proveedor, paquetes con su modalidad, taxonomía administrable, plantillas propias/globales de evento, ciclo y equipo del evento, empresa activa, superficie pública y legal, jobs de `scheduler`/`maintenance` y backups con restauración verificada.
 
 ### 9.2 Funcionalidades Excluidas (Post-MVP, justificadas)
 
@@ -5213,6 +6080,12 @@ Nota: la columna «Pares CODE↔TEST» cuenta las filas con par explícito `ISS-
 | DB-10 | Un solo `coder_role` por Issue y regla de tier estricta (un agente `economy` jamás toma un Issue `frontier`) | Anti-colisión de responsabilidad y asignación de modelos determinista (criterio 6 del prompt) |
 | DB-11 | Conversión de estimaciones a horas para agregados: XS=1.5, S=3, M=6, L=12 | Necesaria para totales de §8 y proyección de hitos; el lease real del claim usa estimación×2 (§3.3), no estas horas |
 | DB-12 | El PR de gobernanza (`ISS-CODE-005`) se integra por una persona con `bootstrap:true` + `status:needs-human` inicial | CICD §7.6 ordena integración humana del primer PR de controles antes de activar el Ruleset |
+| DB-13 | Cada brecha de cobertura se clasifica **funcional** (ningún Issue implementa la capacidad → Issue nuevo) o **de trazabilidad** (la capacidad existe pero no se cita → parche de `source_refs`) | Creada tras la auditoría cruzada (RR-04): de 35 operaciones sin mención, solo 20 exigían código nuevo; crear 35 Issues habría duplicado trabajo ya planificado |
+| DB-14 | El cierre de brechas vive en **una sola épica nueva `EP-23`**, en `MVP-Stage-2`, olas `Wave-11..Wave-13` | Preserva intacta la Etapa 1 ya validada punta a punta (FIX-04..FIX-19) y el DAG auditado; RR-04 exige cerrar «antes de M5», no antes de M1 |
+| DB-15 | Numeración nueva `ISS-CODE-053..061` / `ISS-TEST-053..061`, sin renumerar ningún Issue existente | Los IDs son estables y no se reutilizan (regla del paquete y del prompt de backlog) |
+| DB-16 | Los parches de trazabilidad tocan únicamente `source_refs` y criterios de Issues existentes; **nunca** `allowed_paths`, `depends_on` ni `parallel_wave` | Cambiar rutas o dependencias invalidaría las olas y la matriz anti-colisión verificadas por la auditoría cruzada |
+| DB-17 | Se regenera `blocks` como inverso exacto de `depends_on` en los 119 Issues tras añadir `EP-23` | Mantiene la invariante exigida en §3.2 (FIX-19); ningún Issue nuevo queda sin declarar en el `blocks` de sus predecesores |
+| DB-18 | Los planes nuevos se numeran con el siguiente libre (`Plan0007+`) y `Plans/INDICE.md` es la fuente única de qué número corresponde a qué ejecución; los nombres históricos no se renombran | Un número identificaba varias ejecuciones y ya causó confusión (`Reviews/ReviewTDD_V5.md` P-06); renombrar los archivos rompería citas en `CLAUDE.md` y `Reviews/` |
 
 ## Sección 11 — Tabla Maestra de Roles de Agentes
 

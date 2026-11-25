@@ -10,9 +10,10 @@ Todo el trabajo es de edición de documentos en español.
 
 Carpetas auxiliares:
 - `Reviews/`: revisiones del paquete; `Review_V1.md` originó `Plans/Plan0001.md`, `Review_V2.md` originó `Plans/Plan0003.md` y `Review_V3.md` originó `Plans/Plan0004.md`. Lo que no se adopta de una revisión se justifica en una sección al final de la propia revisión (Review V3 §9).
-- `Plans/`: planes reanudables con checklist. Al reanudar un plan, se lee su sección 0 y su checklist; solo el orquestador marca las tareas.
+- `Plans/`: planes reanudables con checklist. Al reanudar un plan, se lee su sección 0 y su checklist; solo el orquestador marca las tareas. **Antes de crear o reanudar un plan, se consulta `Plans/INDICE.md`**: un número de plan identifica una ejecución, no un tema, y los números antiguos no se reutilizan (decisión `DB-18`).
+- `ProveeEventos_ImplBacklog.md`: plan de desarrollo y backlog de implementación (23 épicas, 41 historias, 119 Issues `ISS-CODE`/`ISS-TEST` con paridad obligatoria, olas `Wave-0..13`, plan de release MVP en 2 etapas). Es el entregable de `Plans/Plan0001_ImplBacklog.md`; su auditoría cruzada es `ProveeEventos_CrossAudit_Report.md` (riesgos `RR-01..RR-09`).
 - `Tools/check_openapi.py`: validador del contrato OpenAPI.
-- `Tools/check_package.py`: validador de coherencia del paquete, con 9 chequeos (marcas de estado de decisiones, matriz PRD↔SRS en ambas direcciones, trazabilidad de operationIds, requisitos, eventos y entregas, IDs de decisión definidos, jobs de SAD §8.2 y versiones declaradas). Su docstring lista las limitaciones aceptadas.
+- `Tools/check_package.py`: validador de coherencia del paquete, con 12 chequeos (marcas de estado de decisiones, matriz PRD↔SRS en ambas direcciones, trazabilidad de operationIds, requisitos, eventos y entregas, IDs de decisión definidos, jobs de SAD §8.2, versiones declaradas y, sobre el backlog, estructura y paridad CODE↔TEST, `source_refs`/`depends_on` resueltos y cobertura del contrato y de los jobs). Su docstring lista las limitaciones aceptadas.
 - `Trazabilidad.md`: matriz SRS-ID → contexto DDD → operationId → eventos → entrega.
 - `Glosario.md`: glosario consolidado ES ↔ EN.
 
@@ -77,7 +78,7 @@ Las decisiones DEC-001..018 y TEC-001..005 de `Decisiones.md` están aprobadas (
 
 - Verificar que un ID citado existe antes de referenciarlo, por ejemplo con `grep -n "SRS-BOOK-003" *.md`.
 - Revisar que los cambios en el YAML y en el DDD/SAD sigan siendo coherentes con el SRS y actualizar `Trazabilidad.md`.
-- `Plans/Plan0001.md` (Review V1), `Plans/Plan0003.md` (Review V2) y `Plans/Plan0004.md` (Review V3) están completos. El siguiente trabajo planificado es `Plans/Plan0002.md` (modelo de datos, UX, notificaciones, pruebas, amenazas, operación y backlog); sus tareas P00 y P10 (decisiones) están completas y sigue P01.
+- `Plans/Plan0001.md` (Review V1), `Plans/Plan0003.md` (Review V2) y `Plans/Plan0004.md` (Review V3) están completos. El siguiente trabajo planificado es `Plans/Plan0002.md` (modelo de datos, UX, notificaciones, pruebas, amenazas, operación y backlog); sus tareas P00 y P10 (decisiones) están completas y sigue P01. `Plans/Plan0006_BacklogGaps.md` cierra los riesgos `RR-04` y `RR-09` de la auditoría del backlog; `Plans/INDICE.md` dice qué número corresponde a qué plan y qué números quedan reservados.
 - Si se inicia código en un repositorio nuevo, seguir la estructura de SAD §4.2 y las reglas de capas de SAD §4.3 en lugar de organizar por tipo técnico (`controllers/`, `services/`).
 - Validar el contrato OpenAPI con `python3 -I Tools/check_openapi.py ProveeEventos_API_Spec.yaml` (refs, operationId, respuestas 4xx, Idempotency-Key).
-- Validar la coherencia del paquete con `python3 -I Tools/check_package.py` (exit 0 esperado) después de cualquier cambio en SRS, SAD, YAML, DDD o `Trazabilidad.md`; un requisito u operación nuevos necesitan su fila en `Trazabilidad.md` y en la matriz del SRS §12; un job nuevo de SAD §8.2, su anotación "(job: <nombre exacto>)"; y un cambio de versión, actualizar todas las referencias a la versión vigente.
+- Validar la coherencia del paquete con `python3 -I Tools/check_package.py` (exit 0 esperado) después de cualquier cambio en SRS, SAD, YAML, DDD, `Trazabilidad.md` o `ProveeEventos_ImplBacklog.md`; un requisito u operación nuevos necesitan su fila en `Trazabilidad.md` y en la matriz del SRS §12; un job nuevo de SAD §8.2, su anotación "(job: <nombre exacto>)"; y un cambio de versión, actualizar todas las referencias a la versión vigente.

@@ -36,6 +36,16 @@ Chequeos:
   9. Versiones: las referencias a la versión vigente de un documento (CLAUDE.md,
      encabezados, pies y Trazabilidad.md) coinciden con la cabecera de ese
      documento, y la cabecera coincide con la última fila de su historial.
+ 10. Backlog: encabezados `#### ISS-CODE-NNN` / `#### ISS-TEST-NNN` únicos, sin
+     huecos ni IDs reservados, cada Issue con todos los campos YAML
+     obligatorios y `issue_id` igual a su encabezado, y paridad CODE<->TEST
+     bidireccional (se exceptúan los Issues de calidad declarados en
+     `PARIDAD_EXCEPTUADA`).
+ 11. Trazabilidad del backlog: todo ID citado en `source_refs` existe en su
+     fuente (SRS, contrato, UXUI, TESTs, Decisiones o SAD), y `depends_on` /
+     `blocks` solo citan Issues del backlog.
+ 12. Cobertura del backlog: cada operationId del contrato y cada job de SAD §8.2
+     se cita en al menos un Issue, salvo `OPERACIONES_EXENTAS`.
 
 Limitaciones aceptadas (Review V3, M-18 y M-19):
   - Los chequeos 3, 5 y 8 verifican presencia, no que el operationId, evento o
@@ -44,6 +54,11 @@ Limitaciones aceptadas (Review V3, M-18 y M-19):
   - El chequeo 6 no interpreta a qué sub-alcance se refiere cada etiqueta.
   - El chequeo 1 reconoce solo las formas de marca que fija CLAUDE.md;
     "pendiente" es además una palabra del dominio.
+  - El chequeo 11 comprueba que el ID exista, no que sea el ID correcto para
+    ese Issue; el chequeo 12 comprueba presencia en el backlog, no en el Issue
+    concreto. Ambos se revisan al editar los Issues. La cobertura de pantallas
+    (`SCR-*`) y de casos de prueba (`TC-*`) no se exige: un Issue puede citar
+    solo los que ejecuta.
 
 Sale con 1 si algún chequeo falla, 0 si todos pasan. Sin dependencias
 externas.
@@ -62,6 +77,10 @@ DEC = ROOT / "Decisiones.md"
 TRZ = ROOT / "Trazabilidad.md"
 GLO = ROOT / "Glosario.md"
 CLA = ROOT / "CLAUDE.md"
+BACKLOG = ROOT / "ProveeEventos_ImplBacklog.md"
+TESTS = ROOT / "ProveeEventos_TESTs.md"
+UXUI = ROOT / "ProveeEventos_UXUI.md"
+ADRS = ROOT / "ProveeEventos_ADRs.md"
 
 DECISION_ID = re.compile(r"\b((?:DEC|TEC|ADR)-\d{3})\b")
 STALE_MARK = re.compile(r"\(pendientes?\)|, pendientes?\b|pendientes? de aprobación", re.I)
@@ -376,6 +395,203 @@ def check_versions():
     return errs
 
 
+# --- Backlog de implementación (ProveeEventos_ImplBacklog.md) --------------
+
+CAMPOS_OBLIGATORIOS = (
+    "issue_id", "type", "stage", "epic_id", "story_id", "priority", "estimate",
+    "parallel_wave", "coder_role", "tester_role", "validator_role", "model_tier",
+    "paired_test_issue", "paired_code_issue", "depends_on", "blocks",
+    "allowed_paths", "forbidden_paths", "source_refs", "github_labels",
+)
+# Issues de calidad `type:test` sin par (DB-06): su número no se usa en ISS-TEST.
+PARIDAD_EXCEPTUADA = {"ISS-CODE-026", "ISS-CODE-048", "ISS-CODE-050"}
+TEST_RESERVADOS = {26, 48, 50}
+OPERACIONES_EXENTAS = {"cloneEvent"}  # FIX-29: la sustituye createEvent con templateId
+ETAPAS = {"MVP-Stage-1", "MVP-Stage-2"}
+ESTIMACIONES = {"XS", "S", "M", "L"}
+TIERS = {"frontier", "economy"}
+
+
+def issues_del_backlog():
+    """{issue_id: (línea del encabezado, cuerpo YAML de metadatos)}."""
+    lineas = lines(BACKLOG)
+    out, actual = {}, None
+    for n, line in enumerate(lineas, 1):
+        m = re.match(r"^#### (ISS-(?:CODE|TEST)-\d{3})\b", line)
+        if m:
+            actual = m.group(1)
+            out[actual] = (n, [])
+        elif line.startswith("#### "):
+            actual = None
+        elif actual:
+            out[actual][1].append(line)
+    return {k: (n, "\n".join(v)) for k, (n, v) in out.items()}
+
+
+def expandir_ids(texto):
+    """Expande `PREFIJO-NNN`, `PREFIJO-NNN/MMM`, `PREFIJO-NNN..MMM` y combinaciones."""
+    out = set()
+    for trozo in texto.split(","):
+        trozo = trozo.strip()
+        m = re.match(r"^((?:[A-Z]+-)+)(\d{3})(.*)$", trozo)
+        if not m:
+            continue
+        pre, primero, cola = m.group(1), m.group(2), m.group(3)
+        grupos = [primero] + [x for x in re.split(r"\s*/\s*", cola.lstrip("/ ")) if x] \
+            if cola else [primero]
+        for g in grupos:
+            g = g.strip()
+            if not g:
+                continue
+            rango = re.match(r"^(\d{3})\s*\.\.\s*(\d{3})$", g)
+            if rango:
+                for i in range(int(rango.group(1)), int(rango.group(2)) + 1):
+                    out.add(f"{pre}{i:03d}")
+            elif re.match(r"^\d{3}$", g):
+                out.add(f"{pre}{g}")
+    return out
+
+
+def check_backlog():
+    errs = []
+    issues = issues_del_backlog()
+    if not issues:
+        return [f"{rel(BACKLOG)}: no se encontraron encabezados '#### ISS-...'"]
+
+    nums = {"CODE": [], "TEST": []}
+    for iid, (n, _) in issues.items():
+        nums[iid.split("-")[1]].append(int(iid.split("-")[2]))
+    for tipo, lista in nums.items():
+        if len(lista) != len(set(lista)):
+            dup = sorted({x for x in lista if lista.count(x) > 1})
+            errs.append(f"{rel(BACKLOG)}: {tipo} duplicado(s): {', '.join(map(str, dup))}")
+        else:
+            reservados = TEST_RESERVADOS if tipo == "TEST" else set()
+            faltan = [x for x in range(1, max(lista) + 1)
+                      if x not in lista and x not in reservados]
+            if faltan:
+                errs.append(f"{rel(BACKLOG)}: {tipo} sin huecos: faltan "
+                            f"{', '.join(f'{x:03d}' for x in faltan)}")
+            usados = sorted(set(lista) & reservados)
+            if usados:
+                errs.append(f"{rel(BACKLOG)}: {tipo} usa número(s) reservado(s): "
+                            f"{', '.join(f'{x:03d}' for x in usados)}")
+
+    pares_code, pares_test = {}, {}
+    for iid, (n, cuerpo) in issues.items():
+        vals = {}
+        for campo in CAMPOS_OBLIGATORIOS:
+            # Los campos de lista (`allowed_paths`, `source_refs`…) van en la línea
+            # sin valor y los elementos en las líneas siguientes.
+            m = re.search(rf"(?m)^{campo}:(.*)$", cuerpo)
+            if not m:
+                errs.append(f"{rel(BACKLOG)}:{n}: {iid} sin campo '{campo}'")
+                continue
+            vals[campo] = m.group(1).strip()
+        if vals.get("issue_id") and vals["issue_id"] != iid:
+            errs.append(f"{rel(BACKLOG)}:{n}: issue_id '{vals['issue_id']}' != encabezado {iid}")
+        if vals.get("type") and vals["type"] not in {"code", "test"}:
+            errs.append(f"{rel(BACKLOG)}:{n}: {iid} type '{vals['type']}' inválido")
+        if vals.get("stage") and vals["stage"] not in ETAPAS:
+            errs.append(f"{rel(BACKLOG)}:{n}: {iid} stage '{vals['stage']}' inválido")
+        if vals.get("estimate") and vals["estimate"] not in ESTIMACIONES:
+            errs.append(f"{rel(BACKLOG)}:{n}: {iid} estimate '{vals['estimate']}' inválido")
+        if vals.get("model_tier") and vals["model_tier"] not in TIERS:
+            errs.append(f"{rel(BACKLOG)}:{n}: {iid} model_tier '{vals['model_tier']}' inválido")
+        if vals.get("parallel_wave") and not re.match(r"^Wave-\d+$", vals["parallel_wave"]):
+            errs.append(f"{rel(BACKLOG)}:{n}: {iid} parallel_wave "
+                        f"'{vals['parallel_wave']}' inválido")
+        for campo in ("depends_on", "blocks"):
+            if campo in vals:
+                for ref in re.findall(r"ISS-(?:CODE|TEST)-\d{3}", vals[campo]):
+                    if ref not in issues:
+                        errs.append(f"{rel(BACKLOG)}:{n}: {iid} {campo} cita '{ref}', "
+                                    f"que no existe")
+        if "paired_test_issue" in vals and iid.startswith("ISS-CODE-"):
+            par = vals["paired_test_issue"]
+            if par in {"null", "—", "-"}:
+                if iid not in PARIDAD_EXCEPTUADA:
+                    errs.append(f"{rel(BACKLOG)}:{n}: {iid} sin par de pruebas")
+            else:
+                pares_code[iid] = par
+        if (iid.startswith("ISS-TEST-") and "paired_code_issue" in vals
+                and vals["paired_code_issue"] not in {"null", "—", "-"}):
+            pares_test[iid] = vals["paired_code_issue"]
+
+    for code, test in pares_code.items():
+        if test not in issues:
+            errs.append(f"{rel(BACKLOG)}: {code} apunta a {test}, que no existe")
+        elif pares_test.get(test) != code:
+            errs.append(f"{rel(BACKLOG)}: {code} <-> {test}: el par no es recíproco "
+                        f"({test} apunta a {pares_test.get(test)})")
+    for test, code in pares_test.items():
+        if code not in pares_code:
+            errs.append(f"{rel(BACKLOG)}: {test} apunta a {code}, que no declara par")
+    return errs
+
+
+def check_backlog_refs():
+    errs = []
+    issues = issues_del_backlog()
+    srs_def = set(srs_defined())
+    # Los NFR se enuncian en tablas (§6 del SRS), no como encabezado: se aceptan
+    # tanto los encabezados como los IDs de la matriz de §12.
+    srs_def |= set(re.findall(r"\b(SRS-(?:NFR-)?[A-Z]+-\d{3})\b",
+                              SRS.read_text(encoding="utf-8")))
+    dec_def = set(re.findall(r"(?m)^## ((?:DEC|TEC)-\d{3})\b",
+                             DEC.read_text(encoding="utf-8")))
+    dec_def |= set(re.findall(r"(?m)^#+ (ADR-[A-Z]+(?:-[A-Z]+)?-\d{3})\b",
+                              ADRS.read_text(encoding="utf-8")))
+    dec_def |= set(re.findall(r"(?m)^#+ (ADR-\d{3})\b",
+                              SAD.read_text(encoding="utf-8")))
+    ops = set(re.findall(r"(?m)^\s*operationId: (\S+)", API.read_text(encoding="utf-8")))
+    scr = set(re.findall(r"SCR-\d{3}", UXUI.read_text(encoding="utf-8")))
+    tcs = set(re.findall(r"TC-[A-Z]+-\d{3}", TESTS.read_text(encoding="utf-8")))
+
+    for iid, (n, cuerpo) in issues.items():
+        bloque = re.search(r"(?ms)^source_refs:\n(.*?)^\S", cuerpo)
+        if not bloque:
+            errs.append(f"{rel(BACKLOG)}:{n}: {iid} sin bloque source_refs")
+            continue
+        for linea in bloque.group(1).splitlines():
+            m = re.match(r"^  - (\w+): (.+)$", linea)
+            if not m:
+                continue
+            clave, valor = m.group(1), m.group(2)
+            ids = expandir_ids(valor)
+            for rid in ids:
+                if rid.startswith("SRS-") and rid not in srs_def:
+                    errs.append(f"{rel(BACKLOG)}:{n}: {iid} cita {rid}, no definido en el SRS")
+                elif rid.startswith(("DEC-", "TEC-", "ADR-")) and rid not in dec_def:
+                    errs.append(f"{rel(BACKLOG)}:{n}: {iid} cita {rid}, no definido")
+                elif rid.startswith("SCR-") and rid not in scr:
+                    errs.append(f"{rel(BACKLOG)}:{n}: {iid} cita {rid}, no definido en la UXUI")
+                elif rid.startswith("TC-") and rid not in tcs:
+                    errs.append(f"{rel(BACKLOG)}:{n}: {iid} cita {rid}, no definido en TESTs")
+            if clave == "API":
+                for op in re.split(r"[,;]\s*", valor):
+                    op = op.strip().strip("`")
+                    if op and re.match(r"^[a-z][A-Za-z0-9]*$", op) and op not in ops:
+                        errs.append(f"{rel(BACKLOG)}:{n}: {iid} cita la operación '{op}', "
+                                    f"ausente del contrato")
+    return errs
+
+
+def check_backlog_cobertura():
+    errs = []
+    texto = "\n".join(c for _, c in issues_del_backlog().values())
+    for op in sorted(re.findall(r"(?m)^\s*operationId: (\S+)",
+                                API.read_text(encoding="utf-8"))):
+        if op in OPERACIONES_EXENTAS:
+            continue
+        if not re.search(rf"(?<![A-Za-z0-9]){re.escape(op)}(?![A-Za-z0-9])", texto):
+            errs.append(f"{rel(API)}: operación '{op}' sin Issue en el backlog")
+    for nombre, n in sad_jobs().items():
+        if nombre not in texto.casefold():
+            errs.append(f"{rel(SAD)}:{n}: job '{nombre}' sin Issue en el backlog")
+    return errs
+
+
 CHECKS = {
     1: ("Marcas de estado de decisiones", check_pending),
     2: ("Matriz PRD <-> SRS", check_matrix),
@@ -386,6 +602,9 @@ CHECKS = {
     7: ("IDs DEC/TEC/ADR definidos", check_decision_ids),
     8: ("Jobs SAD §8.2 <-> Trazabilidad", check_jobs),
     9: ("Versiones declaradas", check_versions),
+    10: ("Backlog: estructura y paridad CODE<->TEST", check_backlog),
+    11: ("Backlog: refs y dependencias resueltas", check_backlog_refs),
+    12: ("Backlog: cobertura de contrato y jobs", check_backlog_cobertura),
 }
 
 
