@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["es2023"],
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "vitest.config.ts", "prisma.config.ts"],
+  "exclude": ["src/tests/architecture/fixtures/**", "node_modules", "dist"]
+}

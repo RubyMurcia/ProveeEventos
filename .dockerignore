@@ -1,0 +1,21 @@
+# Lista de permitidos: todo queda fuera salvo lo declarado.
+**
+!package.json
+!package-lock.json
+!.npmrc
+!tsconfig.base.json
+!backend
+!frontend
+!Tools/dev-stubs
+**/node_modules
+**/dist
+**/.next
+**/coverage
+**/generated/prisma
+**/.env
+**/.env.*
+**/*.pem
+**/*.log
+**/.git
+backend/src/tests
+frontend/tests

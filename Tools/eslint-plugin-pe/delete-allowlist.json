@@ -1,0 +1,14 @@
+{
+  "source": "ProveeEventos_TDD.md \u00a74.0 (borrado f\u00edsico y tablas t\u00e9cnicas); ADR-DATA-017 R1",
+  "replaceable": [
+    "eventCategory",
+    "eventTemplateSelection",
+    "notificationPreference",
+    "providerCategory",
+    "providerCoverageArea",
+    "providerSubtype",
+    "quotationItemOption",
+    "quotationItemSubtype"
+  ],
+  "technicalWorkerOnly": ["emailWebhookEvent", "idempotencyKey", "outboxEvent", "processedEvent"]
+}

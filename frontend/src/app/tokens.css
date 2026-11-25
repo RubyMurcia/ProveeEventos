@@ -1,0 +1,316 @@
+:root {
+  color-scheme: light;
+
+  /* Escalas de color (02 §2.2.1) */
+  --color-purple-50: #F5EEFD;
+  --color-purple-100: #EADBFB;
+  --color-purple-200: #D8BBF7;
+  --color-purple-300: #C98EFF;
+  --color-purple-400: #A862F0;
+  --color-purple-500: #8B2FE0;
+  --color-purple-600: #7A22CC;
+  --color-purple-700: #651AAD;
+  --color-purple-800: #4B1380;
+  --color-purple-900: #32095A;
+  --color-pink-50: #FFF0F7;
+  --color-pink-100: #FFDCEC;
+  --color-pink-200: #FFB9DA;
+  --color-pink-300: #FF8CC3;
+  --color-pink-400: #FF3E9D;
+  --color-pink-500: #E0208A;
+  --color-pink-600: #D6187F;
+  --color-pink-700: #B8106A;
+  --color-pink-800: #900C53;
+  --color-pink-900: #630838;
+  --color-orange-50: #FFF3EC;
+  --color-orange-100: #FFE3D3;
+  --color-orange-200: #FFC7A8;
+  --color-orange-300: #FFA676;
+  --color-orange-400: #FF7A3D;
+  --color-orange-500: #E65F1F;
+  --color-orange-600: #B03F00;
+  --color-orange-700: #8F3300;
+  --color-orange-800: #6E2700;
+  --color-orange-900: #4A1A00;
+  --color-neutral-50: #F8F6FA;
+  --color-neutral-100: #F1EEF5;
+  --color-neutral-200: #E4E0EA;
+  --color-neutral-300: #CFC9D9;
+  --color-neutral-400: #8A8398;
+  --color-neutral-500: #726C80;
+  --color-neutral-600: #5C546A;
+  --color-neutral-700: #453C52;
+  --color-neutral-800: #2E2639;
+  --color-neutral-900: #1B1424;
+
+  /* Acentos planos */
+  --color-yellow-400: #FFD23D;
+  --color-lime-300: #D8FF2B;
+  --color-paper: #FFF6FB;
+  --color-paper-warm: #FFFBF0;
+
+  /* Superficie de escenario */
+  --color-stage-950: #06020A;
+  --color-stage-900: #0E0817;
+  --color-stage-800: #1A0E30;
+  --color-stage-muted: #C9C2D6;
+
+  /* Semánticos: 50 fondo, 600 icono/borde, 700/800 texto */
+  --color-success-50: #E9F8F0;
+  --color-success-600: #16834F;
+  --color-success-700: #11693F;
+  --color-warning-50: #FFF6E0;
+  --color-warning-600: #A66300;
+  --color-warning-800: #7A4A00;
+  --color-error-50: #FDECEF;
+  --color-error-600: #CF2039;
+  --color-error-700: #B3182F;
+  --color-error-800: #8F1226; /* hover destructivo */
+  --color-info-50: #EBF2FE;
+  --color-info-600: #2468D6;
+  --color-info-700: #1B55B8;
+
+  /* Degradados */
+  --gradient-brand: linear-gradient(90deg,#8B2FE0 0%,#FF3E9D 55%,#FF7A3D 100%);
+  --gradient-action: linear-gradient(90deg,#6F1FC0 0%,#B8106A 55%,#B03F00 100%);
+  --gradient-text: linear-gradient(90deg,#6F1FC0 0%,#B8106A 55%,#B03F00 100%);
+  --gradient-stage: linear-gradient(155deg,#1A0E30 0%,#0E0817 100%);
+
+  /* Roles de color (02 §2.2.2); referencian escalas cuando coinciden */
+  --text-primary: var(--color-neutral-900);
+  --text-secondary: var(--color-neutral-600);
+  --text-tertiary: var(--color-neutral-500);
+  --text-disabled: #9A94A8;
+  --text-inverse: #FFFFFF;
+  --text-stage-muted: var(--color-stage-muted);
+  --text-link: var(--color-purple-700);
+  --accent-pink-text: var(--color-pink-700);
+  --action-primary-bg: var(--color-neutral-900);
+  --action-destructive-bg: var(--color-error-700);
+  --gradient-action-worst: var(--color-orange-600);
+  --brand-pink: var(--color-pink-400);
+  --brand-orange: var(--color-orange-400);
+  --brand-yellow: var(--color-yellow-400);
+  --brand-lime: var(--color-lime-300);
+  --lilac: var(--color-purple-300);
+  --border-input: var(--color-neutral-400);
+  --border-subtle: var(--color-neutral-200);
+  --focus-ring: var(--color-purple-600);
+  --focus-ring-stage: var(--color-yellow-400);
+  --success-text: var(--color-success-700);
+  --warning-text: var(--color-warning-800);
+  --error-text: var(--color-error-700);
+  --info-text: var(--color-info-700);
+
+  /* Superficies semánticas (02 §2.2.3) */
+  --surface-page: var(--color-neutral-50);
+  --surface-card: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --surface-sunken: var(--color-neutral-100);
+  --surface-brand-soft: var(--color-paper);
+
+  /* Familias tipográficas (02 §2.3) */
+  --font-display: "Outfit", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Tipografía, valores móviles por defecto (02 §2.3) */
+  --text-display-xl-size: 2.5rem;
+  --text-display-xl-lh: 2.75rem;
+  --text-display-xl-weight: 600;
+  --text-display-xl-tracking: -0.02em;
+  --text-display-lg-size: 2.125rem;
+  --text-display-lg-lh: 2.375rem;
+  --text-display-lg-weight: 600;
+  --text-display-lg-tracking: -0.02em;
+  --text-display-md-size: 1.875rem;
+  --text-display-md-lh: 2.25rem;
+  --text-display-md-weight: 600;
+  --text-display-md-tracking: -0.02em;
+  --text-h1-size: 1.5rem;
+  --text-h1-lh: 1.875rem;
+  --text-h1-weight: 700;
+  --text-h1-tracking: -0.015em;
+  --text-h2-size: 1.25rem;
+  --text-h2-lh: 1.625rem;
+  --text-h2-weight: 600;
+  --text-h2-tracking: -0.01em;
+  --text-h3-size: 1.0625rem;
+  --text-h3-lh: 1.5rem;
+  --text-h3-weight: 600;
+  --text-h3-tracking: -0.005em;
+  --text-h4-size: 1rem;
+  --text-h4-lh: 1.375rem;
+  --text-h4-weight: 600;
+  --text-h4-tracking: 0em;
+  --text-body-lg-size: 1.0625rem;
+  --text-body-lg-lh: 1.625rem;
+  --text-body-lg-weight: 400;
+  --text-body-lg-tracking: 0em;
+  --text-body-size: 1rem;
+  --text-body-lh: 1.5rem;
+  --text-body-weight: 400;
+  --text-body-tracking: 0em;
+  --text-body-sm-size: 0.875rem;
+  --text-body-sm-lh: 1.25rem;
+  --text-body-sm-weight: 400;
+  --text-body-sm-tracking: 0em;
+  --text-label-size: 0.875rem;
+  --text-label-lh: 1.25rem;
+  --text-label-weight: 500;
+  --text-label-tracking: 0em;
+  --text-button-size: 1rem;
+  --text-button-lh: 1.25rem;
+  --text-button-weight: 600;
+  --text-button-tracking: 0.005em;
+  --text-caption-size: 0.78125rem;
+  --text-caption-lh: 1rem;
+  --text-caption-weight: 400;
+  --text-caption-tracking: 0.01em;
+  --text-overline-size: 0.78125rem;
+  --text-overline-lh: 1rem;
+  --text-overline-weight: 700;
+  --text-overline-tracking: 0.12em;
+  --text-kpi-size: 1.75rem;
+  --text-kpi-lh: 2rem;
+  --text-kpi-weight: 700;
+  --text-kpi-tracking: -0.02em;
+  --text-code-size: 0.8125rem;
+  --text-code-lh: 1.25rem;
+  --text-code-weight: 400;
+  --text-code-tracking: 0em;
+
+  /* Espaciado, base 4px (02 §2.4) */
+  --space-0: 0rem;
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-14: 3.5rem;
+  --space-16: 4rem;
+  --space-18: 4.5rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Radios (02 §2.4) */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 26px;
+  --radius-full: 9999px;
+
+  /* Elevaciones (02 §2.4) */
+  --shadow-xs: 0 1px 2px rgba(27,20,36,.06);
+  --shadow-sm: 0 2px 6px rgba(27,20,36,.08);
+  --shadow-md: 0 8px 20px -6px rgba(27,20,36,.14);
+  --shadow-lg: 0 14px 26px -10px rgba(27,20,36,.30);
+  --shadow-xl: 0 24px 46px -18px rgba(27,20,36,.25);
+  --shadow-2xl: 0 32px 64px -12px rgba(27,20,36,.35);
+  --shadow-glow-pink: 0 8px 20px rgba(255,62,157,.45);
+  --shadow-glow-purple: 0 18px 40px rgba(139,47,224,.25);
+  --shadow-glow-lime: 0 6px 20px rgba(216,255,43,.35);
+
+  /* z-index (02 §2.4) */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-nav: 30;
+  --z-dropdown: 40;
+  --z-overlay: 50;
+  --z-modal: 60;
+  --z-toast: 70;
+  --z-tooltip: 80;
+
+  /* Duraciones (02 §2.5.1) */
+  --dur-instant: 100ms;
+  --dur-fast: 150ms;
+  --dur-normal: 250ms;
+  --dur-moderate: 350ms;
+  --dur-slow: 500ms;
+  --dur-shimmer: 1400ms;
+
+  /* Curvas (02 §2.5.1) */
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-linear: cubic-bezier(0, 0, 1, 1);
+
+  /* Medidas de layout (02 §2.4) */
+  --sidebar-w: 264px;
+  --sidebar-w-collapsed: 72px;
+  --topbar-h: 64px;
+  --public-header-h: 72px;
+  --bottomnav-h: 64px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    /* Tipografía, tamaños desktop (02 §2.3) */
+    --text-display-xl-size: 4.5rem;
+    --text-display-xl-lh: 4.75rem;
+    --text-display-lg-size: 3.5rem;
+    --text-display-lg-lh: 3.75rem;
+    --text-display-md-size: 2.5rem;
+    --text-display-md-lh: 2.75rem;
+    --text-h1-size: 1.875rem;
+    --text-h1-lh: 2.25rem;
+    --text-h2-size: 1.375rem;
+    --text-h2-lh: 1.75rem;
+    --text-h3-size: 1.125rem;
+    --text-h3-lh: 1.5rem;
+    --text-h4-size: 1rem;
+    --text-h4-lh: 1.375rem;
+    --text-body-lg-size: 1.125rem;
+    --text-body-lg-lh: 1.75rem;
+    --text-body-size: 0.9375rem;
+    --text-body-lh: 1.375rem;
+    --text-body-sm-size: 0.875rem;
+    --text-body-sm-lh: 1.25rem;
+    --text-label-size: 0.875rem;
+    --text-label-lh: 1.25rem;
+    --text-button-size: 0.9375rem;
+    --text-button-lh: 1.25rem;
+    --text-caption-size: 0.78125rem;
+    --text-caption-lh: 1rem;
+    --text-overline-size: 0.78125rem;
+    --text-overline-lh: 1rem;
+    --text-kpi-size: 2.25rem;
+    --text-kpi-lh: 2.5rem;
+    --text-code-size: 0.8125rem;
+    --text-code-lh: 1.25rem;
+  }
+}
+
+[data-surface="stage"] {
+  /* Escenario (02 §2.2.3) */
+  --text-primary: #FFFFFF;
+  --text-secondary: var(--color-stage-muted);
+  --focus-ring: var(--color-yellow-400);
+  --surface-card: var(--color-stage-800);
+  --border-subtle: rgba(255,255,255,.08);
+  --gradient-text: var(--gradient-brand);
+}
+
+/* Movimiento reducido (02 §2.5.4) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0ms; --dur-fast: 0ms; --dur-normal: 0ms;
+    --dur-moderate: 0ms; --dur-slow: 0ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pe-skeleton::after { display: none; }
+  [data-motion="reveal"] { opacity: 1; transform: none; }
+}

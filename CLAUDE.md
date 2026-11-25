@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Naturaleza del repositorio
 
-Este directorio **no contiene código**: es el paquete de documentación de diseño de ProveeEventos (plataforma para que empresas organizadoras de eventos cotizen y contraten proveedores en Colombia). No es un repositorio git. No hay build, tests, lint ni dependencias que ejecutar. El backend y el frontend aún no existen aquí; el diseño describe cómo deberían construirse.
+Este repositorio contiene el paquete de documentación de diseño de ProveeEventos (plataforma para que empresas organizadoras de eventos cotizen y contraten proveedores en Colombia) y, desde el Día 0 (2026-11-25), el **esqueleto de plataforma** del código (`backend/`, `frontend/`, Docker, linters y pruebas), sin lógica de negocio. Es un repositorio git.
 
-Todo el trabajo es de edición de documentos en español.
+**Para trabajar con código, lee primero `AGENTS.md`** (mapa de carpetas, comandos y reglas). El estado del arranque y lo pendiente están en `ProveeEventos_Day0_Report.md`. Los documentos se editan en español.
 
 Carpetas auxiliares:
 - `Reviews/`: revisiones del paquete; `Review_V1.md` originó `Plans/Plan0001.md`, `Review_V2.md` originó `Plans/Plan0003.md` y `Review_V3.md` originó `Plans/Plan0004.md`. Lo que no se adopta de una revisión se justifica en una sección al final de la propia revisión (Review V3 §9).
@@ -79,6 +79,6 @@ Las decisiones DEC-001..018 y TEC-001..005 de `Decisiones.md` están aprobadas (
 - Verificar que un ID citado existe antes de referenciarlo, por ejemplo con `grep -n "SRS-BOOK-003" *.md`.
 - Revisar que los cambios en el YAML y en el DDD/SAD sigan siendo coherentes con el SRS y actualizar `Trazabilidad.md`.
 - `Plans/Plan0001.md` (Review V1), `Plans/Plan0003.md` (Review V2) y `Plans/Plan0004.md` (Review V3) están completos. El siguiente trabajo planificado es `Plans/Plan0002.md` (modelo de datos, UX, notificaciones, pruebas, amenazas, operación y backlog); sus tareas P00 y P10 (decisiones) están completas y sigue P01. `Plans/Plan0006_BacklogGaps.md` cierra los riesgos `RR-04` y `RR-09` de la auditoría del backlog; `Plans/INDICE.md` dice qué número corresponde a qué plan y qué números quedan reservados.
-- Si se inicia código en un repositorio nuevo, seguir la estructura de SAD §4.2 y las reglas de capas de SAD §4.3 en lugar de organizar por tipo técnico (`controllers/`, `services/`).
+- El código sigue la estructura de SAD §4.2 y las reglas de capas de SAD §4.3 (verificadas por `npm run verify:adrs`), no una organización por tipo técnico (`controllers/`, `services/`).
 - Validar el contrato OpenAPI con `python3 -I Tools/check_openapi.py ProveeEventos_API_Spec.yaml` (refs, operationId, respuestas 4xx, Idempotency-Key).
 - Validar la coherencia del paquete con `python3 -I Tools/check_package.py` (exit 0 esperado) después de cualquier cambio en SRS, SAD, YAML, DDD, `Trazabilidad.md` o `ProveeEventos_ImplBacklog.md`; un requisito u operación nuevos necesitan su fila en `Trazabilidad.md` y en la matriz del SRS §12; un job nuevo de SAD §8.2, su anotación "(job: <nombre exacto>)"; y un cambio de versión, actualizar todas las referencias a la versión vigente.

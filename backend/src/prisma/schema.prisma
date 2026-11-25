@@ -1,0 +1,12 @@
+// Esquema base del Día 0: solo generator y datasource (TDD §4.4; ADR-STACK-004).
+// ISS-CODE-004 traslada aquí los modelos de proveeeventos.prisma y crea las migraciones.
+
+generator client {
+  provider        = "prisma-client"
+  output          = "./generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}

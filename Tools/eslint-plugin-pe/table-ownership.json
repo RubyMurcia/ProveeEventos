@@ -1,0 +1,290 @@
+{
+  "assistedResponseDraft": {
+    "table": "assisted_response_drafts",
+    "owner": "assisted-response"
+  },
+  "auditLog": {
+    "table": "audit_logs",
+    "owner": "administration-audit"
+  },
+  "award": {
+    "table": "awards",
+    "owner": "rfq-offers"
+  },
+  "bookingChangeProposal": {
+    "table": "booking_change_proposals",
+    "owner": "availability-booking"
+  },
+  "bookingConsumedDate": {
+    "table": "booking_consumed_dates",
+    "owner": "availability-booking"
+  },
+  "bookingStatusHistory": {
+    "table": "booking_status_history",
+    "owner": "availability-booking"
+  },
+  "bookingTermsSnapshot": {
+    "table": "booking_terms_snapshots",
+    "owner": "availability-booking"
+  },
+  "booking": {
+    "table": "bookings",
+    "owner": "availability-booking"
+  },
+  "category": {
+    "table": "categories",
+    "owner": "taxonomy-templates"
+  },
+  "commissionRate": {
+    "table": "commission_rates",
+    "owner": "availability-booking"
+  },
+  "commissionRecord": {
+    "table": "commission_records",
+    "owner": "availability-booking"
+  },
+  "consentRecord": {
+    "table": "consent_records",
+    "owner": "identity-access"
+  },
+  "dataSubjectRequest": {
+    "table": "data_subject_requests",
+    "owner": "administration-audit"
+  },
+  "deliveryAttempt": {
+    "table": "delivery_attempts",
+    "owner": "messaging-notifications"
+  },
+  "disputeResolution": {
+    "table": "dispute_resolutions",
+    "owner": "administration-audit"
+  },
+  "emailWebhookEvent": {
+    "table": "email_webhook_events",
+    "owner": "messaging-notifications"
+  },
+  "eventAssignment": {
+    "table": "event_assignments",
+    "owner": "event-management"
+  },
+  "eventCategory": {
+    "table": "event_categories",
+    "owner": "event-management"
+  },
+  "eventTemplateSelection": {
+    "table": "event_template_selections",
+    "owner": "taxonomy-templates"
+  },
+  "eventTemplate": {
+    "table": "event_templates",
+    "owner": "taxonomy-templates"
+  },
+  "event": {
+    "table": "events",
+    "owner": "event-management"
+  },
+  "holiday": {
+    "table": "holidays",
+    "owner": "administration-audit"
+  },
+  "idempotencyKey": {
+    "table": "idempotency_keys",
+    "owner": "platform"
+  },
+  "invitation": {
+    "table": "invitations",
+    "owner": "organizations"
+  },
+  "legalHold": {
+    "table": "legal_holds",
+    "owner": "administration-audit"
+  },
+  "magicLinkGrant": {
+    "table": "magic_link_grants",
+    "owner": "rfq-offers"
+  },
+  "membership": {
+    "table": "memberships",
+    "owner": "organizations"
+  },
+  "messageTemplate": {
+    "table": "message_templates",
+    "owner": "messaging-notifications"
+  },
+  "notificationPreference": {
+    "table": "notification_preferences",
+    "owner": "messaging-notifications"
+  },
+  "notification": {
+    "table": "notifications",
+    "owner": "messaging-notifications"
+  },
+  "organizationPlan": {
+    "table": "organization_plans",
+    "owner": "organizations"
+  },
+  "organization": {
+    "table": "organizations",
+    "owner": "organizations"
+  },
+  "outboxEvent": {
+    "table": "outbox_events",
+    "owner": "platform"
+  },
+  "ownershipTransfer": {
+    "table": "ownership_transfers",
+    "owner": "organizations"
+  },
+  "packageDailyCapacity": {
+    "table": "package_daily_capacity",
+    "owner": "availability-booking"
+  },
+  "planUsageCounter": {
+    "table": "plan_usage_counters",
+    "owner": "organizations"
+  },
+  "plan": {
+    "table": "plans",
+    "owner": "organizations"
+  },
+  "portfolioAsset": {
+    "table": "portfolio_assets",
+    "owner": "provider-catalog"
+  },
+  "processedEvent": {
+    "table": "processed_events",
+    "owner": "platform"
+  },
+  "providerAvailability": {
+    "table": "provider_availability",
+    "owner": "availability-booking"
+  },
+  "providerCategory": {
+    "table": "provider_categories",
+    "owner": "provider-catalog"
+  },
+  "providerCoverageArea": {
+    "table": "provider_coverage_areas",
+    "owner": "provider-catalog"
+  },
+  "providerDailyCapacity": {
+    "table": "provider_daily_capacity",
+    "owner": "availability-booking"
+  },
+  "providerReputation": {
+    "table": "provider_reputation",
+    "owner": "provider-catalog"
+  },
+  "providerSearch": {
+    "table": "provider_search",
+    "owner": "provider-catalog"
+  },
+  "providerSubtype": {
+    "table": "provider_subtypes",
+    "owner": "provider-catalog"
+  },
+  "providerVerificationDecision": {
+    "table": "provider_verification_decisions",
+    "owner": "provider-catalog"
+  },
+  "providerVerificationEvidence": {
+    "table": "provider_verification_evidence",
+    "owner": "provider-catalog"
+  },
+  "providerVerificationSubmission": {
+    "table": "provider_verification_submissions",
+    "owner": "provider-catalog"
+  },
+  "provider": {
+    "table": "providers",
+    "owner": "provider-catalog"
+  },
+  "quickQuotationOption": {
+    "table": "quick_quotation_options",
+    "owner": "quotation"
+  },
+  "quickQuotation": {
+    "table": "quick_quotations",
+    "owner": "quotation"
+  },
+  "quotationDocument": {
+    "table": "quotation_documents",
+    "owner": "quotation"
+  },
+  "quotationItemOption": {
+    "table": "quotation_item_options",
+    "owner": "quotation"
+  },
+  "quotationItemSubtype": {
+    "table": "quotation_item_subtypes",
+    "owner": "quotation"
+  },
+  "quotationItemTrackingHistory": {
+    "table": "quotation_item_tracking_history",
+    "owner": "quotation"
+  },
+  "quotationItem": {
+    "table": "quotation_items",
+    "owner": "quotation"
+  },
+  "quotationVersion": {
+    "table": "quotation_versions",
+    "owner": "quotation"
+  },
+  "quotation": {
+    "table": "quotations",
+    "owner": "quotation"
+  },
+  "rankingConfiguration": {
+    "table": "ranking_configurations",
+    "owner": "provider-catalog"
+  },
+  "retentionExecution": {
+    "table": "retention_executions",
+    "owner": "administration-audit"
+  },
+  "reviewReport": {
+    "table": "review_reports",
+    "owner": "reviews"
+  },
+  "review": {
+    "table": "reviews",
+    "owner": "reviews"
+  },
+  "rfqCycle": {
+    "table": "rfq_cycles",
+    "owner": "rfq-offers"
+  },
+  "rfqItem": {
+    "table": "rfq_items",
+    "owner": "rfq-offers"
+  },
+  "rfqOffer": {
+    "table": "rfq_offers",
+    "owner": "rfq-offers"
+  },
+  "rfqRequest": {
+    "table": "rfq_requests",
+    "owner": "rfq-offers"
+  },
+  "servicePackage": {
+    "table": "service_packages",
+    "owner": "provider-catalog"
+  },
+  "subtype": {
+    "table": "subtypes",
+    "owner": "taxonomy-templates"
+  },
+  "userGlobalRole": {
+    "table": "user_global_roles",
+    "owner": "identity-access"
+  },
+  "user": {
+    "table": "users",
+    "owner": "identity-access"
+  },
+  "whatsappTemplate": {
+    "table": "whatsapp_templates",
+    "owner": "taxonomy-templates"
+  }
+}

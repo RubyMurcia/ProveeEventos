@@ -1,0 +1,85 @@
+{
+  "source": "ADR-ARCH-010 R1, ADR-STACK-001 R5-R6, ADR-SEC-001 R4, ADR-SEC-002 R5",
+  "packages": [
+    {
+      "adr": "ADR-ARCH-010",
+      "reason": "capacidad fuera del MVP: pagos",
+      "names": ["stripe", "mercadopago", "braintree", "paypal-rest-sdk", "@paypal/*", "@stripe/*"]
+    },
+    {
+      "adr": "ADR-ARCH-010",
+      "reason": "capacidad fuera del MVP: clientes de WhatsApp",
+      "names": ["whatsapp-web.js", "@whiskeysockets/baileys", "whatsapp-cloud-api", "whatsapp"]
+    },
+    {
+      "adr": "ADR-ARCH-010",
+      "reason": "capacidad fuera del MVP: SDK de modelos de IA",
+      "names": [
+        "openai",
+        "@anthropic-ai/*",
+        "@google/generative-ai",
+        "@google/genai",
+        "cohere-ai",
+        "@mistralai/*",
+        "langchain",
+        "@langchain/*",
+        "ai",
+        "@ai-sdk/*"
+      ]
+    },
+    {
+      "adr": "ADR-ARCH-010",
+      "reason": "capacidad fuera del MVP: motores de búsqueda externos",
+      "names": [
+        "@elastic/*",
+        "elasticsearch",
+        "@opensearch-project/*",
+        "algoliasearch",
+        "meilisearch",
+        "typesense"
+      ]
+    },
+    {
+      "adr": "ADR-ARCH-010",
+      "reason": "scraping o automatización de sesiones de terceros",
+      "names": ["puppeteer-extra", "cheerio", "selenium-webdriver"]
+    },
+    {
+      "adr": "ADR-STACK-001",
+      "reason": "sustituto del stack aprobado",
+      "names": [
+        "@nestjs/*",
+        "fastify",
+        "koa",
+        "@hapi/*",
+        "typeorm",
+        "sequelize",
+        "mongoose",
+        "knex",
+        "drizzle-orm",
+        "jest",
+        "mocha",
+        "winston",
+        "bunyan",
+        "joi",
+        "yup",
+        "eslint-plugin-prettier"
+      ]
+    },
+    {
+      "adr": "ADR-STACK-001 R6",
+      "reason": "puppeteer exige la enmienda de DEC-016",
+      "names": ["puppeteer", "puppeteer-core"]
+    },
+    {
+      "adr": "ADR-SEC-001",
+      "reason": "no se almacenan contraseñas",
+      "names": ["bcrypt", "bcryptjs", "argon2", "scrypt-js"]
+    },
+    {
+      "adr": "ADR-SEC-002",
+      "reason": "la API no acepta cookies como credencial",
+      "names": ["cookie-parser"]
+    }
+  ]
+}

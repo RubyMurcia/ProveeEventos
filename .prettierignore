@@ -1,0 +1,23 @@
+# Documentación normativa y material de trabajo: no se formatean.
+*.md
+ProveeEventos_API_Spec.yaml
+proveeeventos.prisma
+proveeeventos.sql
+Plans/
+Reviews/
+.agents/
+.claude/
+.hermes/
+.zcode/
+skills-lock.json
+
+# Archivos copiados literalmente de la documentación (CICD §5.4, UXUI §2.8).
+docker-compose.yml
+frontend/src/app/tokens.css
+frontend/src/lib/design/tokens.tokens.json
+
+# Generados y fixtures con defectos deliberados.
+package-lock.json
+next-env.d.ts
+**/generated/
+backend/src/tests/architecture/fixtures/

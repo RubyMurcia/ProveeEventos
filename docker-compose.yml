@@ -1,0 +1,514 @@
+# Entorno local de ProveeEventos (Etapa 1). Las imágenes proveeeventos/* son locales: pull_policy impide
+# buscarlas en un registro público. Se invoca siempre con:
+#   docker compose --env-file docker/images.env --env-file .env ...
+name: proveeeventos
+
+x-backend-build: &backend-build
+  context: .
+  dockerfile: backend/Dockerfile
+  args:
+    NODE_IMAGE: ${NODE_IMAGE:?falta docker/images.env}
+
+x-hardening: &hardening
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: ["ALL"]
+  init: true
+
+x-common-env: &common-env
+  APP_ENV: ${APP_ENV:?define APP_ENV}
+  TZ: UTC
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  FEATURE_E2_ENABLED: ${FEATURE_E2_ENABLED:-false}
+
+x-redis-env: &redis-env
+  REDIS_URL: redis://:${REDIS_PASSWORD:?}@redis:6379/0
+
+x-token-env: &token-env
+  APP_BASE_URL: ${APP_BASE_URL:?}
+  TOKEN_DERIVATION_KEYS: ${TOKEN_DERIVATION_KEYS:?}
+  TOKEN_DERIVATION_ACTIVE_VERSION: ${TOKEN_DERIVATION_ACTIVE_VERSION:?}
+
+x-documents-env: &documents-env
+  DOCUMENT_STORAGE_DRIVER: ${DOCUMENT_STORAGE_DRIVER:?}
+  DOCUMENT_STORAGE_PATH: /var/lib/pe/documents
+
+x-deadlines-env: &deadlines-env
+  CANCELLATION_RESPONSE_HOURS: ${CANCELLATION_RESPONSE_HOURS:-72}
+  COMPLETION_WINDOW_DAYS: ${COMPLETION_WINDOW_DAYS:-5}
+
+x-api-env: &api-env
+  <<: [*common-env, *redis-env, *token-env, *documents-env, *deadlines-env]
+  API_PORT: "4000"
+  HEALTH_PORT: "4000"
+  DATABASE_URL: postgresql://pe_api:${PE_API_PASSWORD:?}@pgbouncer:5432/${POSTGRES_DB:?}
+  DB_POOL_MAX: ${DB_POOL_MAX:-10}
+  AUTH0_ISSUER_BASE_URL: ${AUTH0_ISSUER_BASE_URL:?}
+  AUTH0_BACKCHANNEL_BASE_URL: ${AUTH0_BACKCHANNEL_BASE_URL:-}
+  AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:?}
+  TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:?}
+  SENDGRID_WEBHOOK_PUBLIC_KEY: ${SENDGRID_WEBHOOK_PUBLIC_KEY:?}
+  CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:?}
+  CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:?}
+  CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:?}
+  CLOUDINARY_UPLOAD_BASE_URL: ${CLOUDINARY_UPLOAD_BASE_URL:?}
+  CLOUDINARY_API_BASE_URL: ${CLOUDINARY_API_BASE_URL:?}
+  MEDIA_ALLOWED_IMAGE_TYPES: ${MEDIA_ALLOWED_IMAGE_TYPES:-image/jpeg,image/png,image/webp}
+  MEDIA_ALLOWED_VIDEO_TYPES: ${MEDIA_ALLOWED_VIDEO_TYPES:-video/mp4}
+  MEDIA_MAX_IMAGE_BYTES: ${MEDIA_MAX_IMAGE_BYTES:?}
+  MEDIA_MAX_VIDEO_BYTES: ${MEDIA_MAX_VIDEO_BYTES:?}
+  MEDIA_MAX_VIDEO_SECONDS: ${MEDIA_MAX_VIDEO_SECONDS:?}
+  DOCUMENT_URL_SIGNING_KEY: ${DOCUMENT_URL_SIGNING_KEY:?}
+  DOCUMENT_URL_TTL_SECONDS: ${DOCUMENT_URL_TTL_SECONDS:-300}
+  MAPS_PROVIDER: ${MAPS_PROVIDER:-disabled}
+  GOOGLE_MAPS_SERVER_KEY: ${GOOGLE_MAPS_SERVER_KEY:-}
+  RATE_LIMIT_CATALOG_PER_MINUTE: ${RATE_LIMIT_CATALOG_PER_MINUTE:-120}
+  RATE_LIMIT_MAGIC_FAILURES_PER_10_MINUTES: ${RATE_LIMIT_MAGIC_FAILURES_PER_10_MINUTES:-10}
+  RATE_LIMIT_MAGIC_TOKEN_PER_HOUR: ${RATE_LIMIT_MAGIC_TOKEN_PER_HOUR:-20}
+  RATE_LIMIT_ASSISTED_IMPORT_PER_HOUR: ${RATE_LIMIT_ASSISTED_IMPORT_PER_HOUR:-30}
+  RATE_LIMIT_REGISTRATION_PER_HOUR: ${RATE_LIMIT_REGISTRATION_PER_HOUR:-5}
+  RATE_LIMIT_WRITES_PER_MINUTE: ${RATE_LIMIT_WRITES_PER_MINUTE:-300}
+
+x-worker-env: &worker-env
+  <<: [*common-env, *redis-env, *token-env, *documents-env, *deadlines-env]
+  WORKER_HEALTH_PORT: "4001"
+  HEALTH_PORT: "4001"
+  DATABASE_URL: postgresql://pe_worker:${PE_WORKER_PASSWORD:?}@pgbouncer:5432/${POSTGRES_DB:?}
+  RETENTION_DATABASE_URL: postgresql://pe_retention:${PE_RETENTION_PASSWORD:?}@pgbouncer:5432/${POSTGRES_DB:?}
+  DB_POOL_MAX: ${DB_POOL_MAX:-10}
+  EMAIL_PROVIDER: ${EMAIL_PROVIDER:?}
+  EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:?}
+  EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-ProveeEventos}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-}
+  SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+  SENDGRID_API_BASE_URL: ${SENDGRID_API_BASE_URL:-}
+  WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-10}
+  OUTBOX_POLL_INTERVAL_MS: ${OUTBOX_POLL_INTERVAL_MS:-5000}
+
+x-web-env: &web-env
+  <<: *common-env
+  AUTH0_ISSUER_BASE_URL: ${AUTH0_ISSUER_BASE_URL:?}
+  AUTH0_BACKCHANNEL_BASE_URL: ${AUTH0_BACKCHANNEL_BASE_URL:-}
+  AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:?}
+  AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID:?}
+  AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET:?}
+  SESSION_COOKIE_KEYS: ${SESSION_COOKIE_KEYS:?}
+  SESSION_IDLE_TIMEOUT_SECONDS: ${SESSION_IDLE_TIMEOUT_SECONDS:-86400}
+  APP_BASE_URL: ${APP_BASE_URL:?}
+  API_BASE_URL: http://api:4000
+  CLOUDINARY_UPLOAD_BASE_URL: ${CLOUDINARY_UPLOAD_BASE_URL:?}
+  MAPS_PROVIDER: ${MAPS_PROVIDER:-disabled}
+  MAPS_BROWSER_KEY: ${MAPS_BROWSER_KEY:-}
+
+x-api-healthcheck: &api-healthcheck
+  test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/health/ready').then((r)=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+  interval: 5s
+  timeout: 3s
+  retries: 30
+  start_period: 20s
+
+x-worker-healthcheck: &worker-healthcheck
+  test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4001/health/ready').then((r)=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+  interval: 5s
+  timeout: 3s
+  retries: 30
+  start_period: 20s
+
+x-web-healthcheck: &web-healthcheck
+  test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health/live').then((r)=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+  interval: 5s
+  timeout: 3s
+  retries: 30
+  start_period: 30s
+
+x-app-depends: &app-depends
+  seed: { condition: service_completed_successfully }
+  pgbouncer: { condition: service_healthy }
+  redis: { condition: service_healthy }
+
+services:
+  # ---------- Infraestructura (sin perfil: siempre disponible) ----------
+  postgres:
+    image: ${PG_IMAGE:?}
+    command: ["postgres", "-c", "max_connections=100"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --auth-host=scram-sha-256
+      TZ: UTC
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # -h 127.0.0.1 evita el falso positivo del servidor temporal de inicialización.
+      test: ["CMD-SHELL", 'pg_isready -h 127.0.0.1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks: [data]
+    restart: unless-stopped
+
+  db-bootstrap:
+    image: ${PG_IMAGE:?}
+    user: postgres
+    entrypoint: ["sh", "/scripts/bootstrap.sh"]
+    environment:
+      APP_ENV: ${APP_ENV:?}
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:?}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?}
+      PGDATABASE: ${POSTGRES_DB:?}
+      PE_MIGRATOR_PASSWORD: ${PE_MIGRATOR_PASSWORD:?}
+      PE_API_PASSWORD: ${PE_API_PASSWORD:?}
+      PE_WORKER_PASSWORD: ${PE_WORKER_PASSWORD:?}
+      PE_RETENTION_PASSWORD: ${PE_RETENTION_PASSWORD:?}
+      PE_READONLY_PASSWORD: ${PE_READONLY_PASSWORD:?}
+    volumes:
+      - ./backend/src/prisma/bootstrap:/bootstrap:ro
+      - ./scripts/db:/scripts:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [data]
+    restart: "no"
+
+  pgbouncer:
+    <<: *hardening
+    image: ${PGBOUNCER_IMAGE:?}
+    entrypoint: ["sh", "/etc/pe/start.sh"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      PE_API_PASSWORD: ${PE_API_PASSWORD:?}
+      PE_WORKER_PASSWORD: ${PE_WORKER_PASSWORD:?}
+      PE_RETENTION_PASSWORD: ${PE_RETENTION_PASSWORD:?}
+    volumes:
+      - ./docker/pgbouncer:/etc/pe:ro
+    tmpfs:
+      - /tmp
+    depends_on:
+      db-bootstrap: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "5432"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [data]
+    restart: unless-stopped
+
+  redis:
+    <<: *hardening
+    image: ${REDIS_IMAGE:?}
+    user: "999:999"
+    command: ["sh", "-c", 'exec redis-server --appendonly yes --maxmemory-policy noeviction --requirepass "$$REDIS_PASSWORD"']
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?}
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [data]
+    restart: unless-stopped
+
+  migrate:
+    <<: *hardening
+    image: proveeeventos/migrate:local
+    pull_policy: build
+    build:
+      <<: *backend-build
+      target: migrate
+    environment:
+      APP_ENV: ${APP_ENV:?}
+      TZ: UTC
+      DIRECT_URL: postgresql://pe_migrator:${PE_MIGRATOR_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}
+    depends_on:
+      db-bootstrap: { condition: service_completed_successfully }
+    networks: [data]
+    restart: "no"
+
+  db-rls:
+    image: ${PG_IMAGE:?}
+    user: postgres
+    entrypoint: ["sh", "/scripts/apply-rls.sh"]
+    environment:
+      APP_ENV: ${APP_ENV:?}
+      DB_APPLY_RLS: ${DB_APPLY_RLS:-false}
+      PGHOST: postgres
+      PGUSER: pe_migrator
+      PGPASSWORD: ${PE_MIGRATOR_PASSWORD:?}
+      PGDATABASE: ${POSTGRES_DB:?}
+    volumes:
+      - ./backend/src/prisma/rls:/rls:ro
+      - ./scripts/db:/scripts:ro
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    networks: [data]
+    restart: "no"
+
+  seed:
+    <<: *hardening
+    profiles: [dev, test]
+    image: proveeeventos/backend:local
+    pull_policy: build
+    build:
+      <<: *backend-build
+      target: runner
+    command: ["node", "dist/prisma/seed/index.js"]
+    healthcheck:
+      disable: true
+    environment:
+      <<: *common-env
+      NODE_ENV: production
+      SEED_SYNTHETIC: ${SEED_SYNTHETIC:-false}
+      DIRECT_URL: postgresql://pe_migrator:${PE_MIGRATOR_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}
+    depends_on:
+      db-rls: { condition: service_completed_successfully }
+    networks: [data]
+    restart: "no"
+
+  # ---------- Dobles locales ----------
+  mailpit:
+    <<: *hardening
+    profiles: [dev, test]
+    image: ${MAILPIT_IMAGE:?}
+    ports:
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [edge, data]
+
+  dev-stubs:
+    <<: *hardening
+    profiles: [dev, test]
+    image: proveeeventos/dev-stubs:local
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: Tools/dev-stubs/Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:?}
+    environment:
+      APP_ENV: ${APP_ENV:?}
+      AUTH0_ISSUER_BASE_URL: ${AUTH0_ISSUER_BASE_URL:?}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:?}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID:?}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET:?}
+      APP_BASE_URL: ${APP_BASE_URL:?}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:?}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:?}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:?}
+      DEV_SENDGRID_WEBHOOK_PRIVATE_KEY: ${DEV_SENDGRID_WEBHOOK_PRIVATE_KEY:-}
+    ports:
+      - "127.0.0.1:${DEV_STUBS_PORT:-4010}:4010"
+    networks: [edge]
+
+  # ---------- Aplicación en modo desarrollo (hot reload) ----------
+  api:
+    <<: *hardening
+    profiles: [dev]
+    image: proveeeventos/backend-dev:local
+    pull_policy: build
+    build:
+      <<: *backend-build
+      target: dev
+    command: ["npm", "run", "dev:api", "--workspace", "backend"]
+    environment:
+      <<: *api-env
+      NODE_ENV: development
+    ports:
+      - "127.0.0.1:${API_PORT:-4000}:4000"
+    volumes:
+      - documents:/var/lib/pe/documents
+    healthcheck: *api-healthcheck
+    depends_on:
+      <<: *app-depends
+      dev-stubs: { condition: service_healthy }
+    networks: [edge, data]
+    develop:
+      watch:
+        - { action: sync, path: ./backend/src, target: /app/backend/src, ignore: [tests/, prisma/generated/] }
+        - { action: rebuild, path: ./backend/src/prisma/schema.prisma }
+        - { action: rebuild, path: ./backend/package.json }
+        - { action: rebuild, path: ./package-lock.json }
+
+  worker:
+    <<: *hardening
+    profiles: [dev]
+    image: proveeeventos/backend-dev:local
+    pull_policy: build
+    build:
+      <<: *backend-build
+      target: dev
+    command: ["npm", "run", "dev:worker", "--workspace", "backend"]
+    environment:
+      <<: *worker-env
+      NODE_ENV: development
+    volumes:
+      - documents:/var/lib/pe/documents
+    healthcheck: *worker-healthcheck
+    stop_grace_period: 30s
+    depends_on:
+      <<: *app-depends
+      mailpit: { condition: service_healthy }
+    networks: [edge, data]
+    develop:
+      watch:
+        - { action: sync, path: ./backend/src, target: /app/backend/src, ignore: [tests/, prisma/generated/] }
+        - { action: rebuild, path: ./backend/src/prisma/schema.prisma }
+        - { action: rebuild, path: ./backend/package.json }
+        - { action: rebuild, path: ./package-lock.json }
+
+  web:
+    <<: *hardening
+    profiles: [dev]
+    image: proveeeventos/web-dev:local
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: dev
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:?}
+    environment:
+      <<: *web-env
+      NODE_ENV: development
+      # Sondeo de archivos: no depende del límite inotify del equipo (ProveeEventos_Day0_Report.md, §7).
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    healthcheck: *web-healthcheck
+    depends_on:
+      api: { condition: service_healthy }
+      dev-stubs: { condition: service_healthy }
+    networks: [edge]
+    develop:
+      watch:
+        - { action: sync, path: ./frontend/src, target: /app/frontend/src }
+        - { action: rebuild, path: ./frontend/package.json }
+        - { action: rebuild, path: ./package-lock.json }
+
+  # ---------- Aplicación con imágenes de ejecución (smoke y E2E) ----------
+  api-test:
+    <<: *hardening
+    profiles: [test]
+    image: proveeeventos/backend:local
+    pull_policy: build
+    build:
+      <<: *backend-build
+      target: runner
+    environment:
+      <<: *api-env
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:${API_PORT:-4000}:4000"
+    volumes:
+      - documents:/var/lib/pe/documents
+    healthcheck: *api-healthcheck
+    read_only: true
+    tmpfs: [/tmp]
+    depends_on:
+      <<: *app-depends
+      dev-stubs: { condition: service_healthy }
+    networks:
+      edge:
+        aliases: [api]
+      data:
+
+  worker-test:
+    <<: *hardening
+    profiles: [test]
+    image: proveeeventos/backend:local
+    pull_policy: never
+    command: ["node", "--enable-source-maps", "dist/bootstrap/worker.js"]
+    environment:
+      <<: *worker-env
+      NODE_ENV: production
+    volumes:
+      - documents:/var/lib/pe/documents
+    healthcheck: *worker-healthcheck
+    stop_grace_period: 30s
+    read_only: true
+    tmpfs: [/tmp]
+    depends_on:
+      <<: *app-depends
+      mailpit: { condition: service_healthy }
+    networks: [edge, data]
+
+  web-test:
+    <<: *hardening
+    profiles: [test]
+    image: proveeeventos/web:local
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: runner
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:?}
+    environment:
+      <<: *web-env
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    healthcheck: *web-healthcheck
+    depends_on:
+      api-test: { condition: service_healthy }
+      dev-stubs: { condition: service_healthy }
+    networks: [edge]
+
+  # ---------- Herramientas puntuales ----------
+  psql:
+    profiles: [tools]
+    image: ${PG_IMAGE:?}
+    user: postgres
+    entrypoint: ["psql"]
+    environment:
+      PGHOST: postgres
+      PGUSER: pe_readonly
+      PGPASSWORD: ${PE_READONLY_PASSWORD:?}
+      PGDATABASE: ${POSTGRES_DB:?}
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [data]
+
+  db-authoring:
+    profiles: [tools]
+    image: proveeeventos/migrate:local
+    pull_policy: build
+    build:
+      <<: *backend-build
+      target: migrate
+    user: ${HOST_UID:-1000}:${HOST_GID:-1000}
+    environment:
+      APP_ENV: ${APP_ENV:?}
+      TZ: UTC
+      DIRECT_URL: postgresql://pe_migrator:${PE_MIGRATOR_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}
+      SHADOW_DATABASE_URL: postgresql://pe_migrator:${PE_MIGRATOR_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}_shadow
+    volumes:
+      - ./backend/src/prisma:/app/backend/src/prisma
+    depends_on:
+      db-bootstrap: { condition: service_completed_successfully }
+    networks: [data]
+
+  secrets-scan:
+    profiles: [tools]
+    image: ${GITLEAKS_IMAGE:?}
+    command: ["dir", "/repo", "--redact", "--exit-code", "1", "--config", "/repo/Tools/adr-guard/gitleaks.toml"]
+    volumes:
+      - .:/repo:ro
+    network_mode: none
+
+volumes:
+  pgdata:
+  redisdata:
+  documents:
+
+networks:
+  edge:
+  data:
+    internal: true

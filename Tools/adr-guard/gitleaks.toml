@@ -1,0 +1,9 @@
+title = "ProveeEventos"
+
+[extend]
+useDefault = true
+
+# Solo afecta al escaneo local del árbol de trabajo: .env nunca se versiona y adr-guard lo veta.
+[[allowlists]]
+description = "Archivos locales ignorados por Git"
+paths = ['''(^|/)\.env$''', '''(^|/)node_modules/''']
