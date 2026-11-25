@@ -47,7 +47,7 @@ npm run dev:up            # web :3000 · API :4000 · Mailpit :8025 · dobles :4
 **Obligatorios antes de abrir un PR** (todos en código 0):
 
 ```bash
-npm run verify:adrs       # formato, tipos, lint, dependencias, unit + arquitectura con cobertura
+npm run verify:adrs       # formato, tipos, lint, dependencias, unit + arquitectura (sin umbrales de cobertura)
 npm run verify:env        # esquemas de entorno frente a .env.example
 npm run build
 npm run test:unit
@@ -59,6 +59,29 @@ Además, las suites de tu alcance: `test:int`, `test:api`, `test:mt`, `test:conc
 Atajos: `typecheck` = `verify:types` · `lint` = `verify:lint` · `lint:arch` = `verify:deps` · `dev` = `dev:watch`.
 Base de datos: `db:migrate`, `db:migrate:create -- <nombre>`, `db:seed`, `db:psql`, `dev:reset` (borra volúmenes).
 Si `3000`, `4000`, `4010` u `8025` están ocupados, exporta `WEB_PORT`, `API_PORT`, `DEV_STUBS_PORT` o `MAILPIT_UI_PORT` (y `APP_BASE_URL` si cambias el de la web).
+
+### 3.1 Cobertura: separada de las verificaciones del código
+
+La cobertura se exige en el Issue de pruebas, no en el de código (resuelve el pendiente `P-01`: los Issues `ISS-CODE-*` no tienen rutas de pruebas en sus `allowed_paths`).
+
+| Issue | Comandos | Cobertura |
+|---|---|---|
+| `ISS-CODE-*` | `verify:adrs` y `test:unit` ejecutan las pruebas existentes | No se mide ni bloquea |
+| `ISS-TEST-*` | Además, **`npm run verify:coverage`** en código 0 antes de abrir el PR | Bloqueante |
+
+Umbrales de `verify:coverage` (líneas y ramas, definidos en `backend/vitest.config.ts`; TESTs §4.1, `ADR-TEST-006 R3`):
+
+| Ámbito | Líneas | Ramas |
+|---|---|---|
+| `modules/*/domain` | 90 % | 90 % |
+| `modules/*/application` | 80 % | 80 % |
+| `shared/` | 85 % | 85 % |
+| Global (`backend/src`) | 80 % | 75 % |
+
+- `verify:coverage` mide las suites `unit` y `architecture`; las de integración, contrato, concurrencia, multi-tenant y seguridad no suman.
+- Los umbrales no se bajan ni se amplían las exclusiones. Si no puedes alcanzarlos desde tus `allowed_paths`, repórtalo como `spec-conflict`.
+- Una Historia no está completa hasta que su `ISS-TEST-*` cierre con la cobertura en verde.
+- Esta separación difiere de `ADR §6.1`, `TESTs §15.3` y `CICD §7.3`, que miden cobertura en `verify:arch` y `test:unit`; los documentos normativos aún no se han enmendado. Para `verify:adrs`, `verify:arch` y `test:unit` rige este archivo.
 
 ## 4. Reglas inquebrantables
 
