@@ -1,0 +1,93 @@
+# Planes de trabajo y revisiones del paquete: no se versionan
+/Plans/
+/Reviews/
+
+# Registro de habilidades del asistente
+/skills-lock.json
+
+# ---------------------------------------------------------------------------
+# Stack de desarrollo: Node.js, Express, Next.js, TypeScript, Prisma,
+# PostgreSQL, Redis/BullMQ, Vercel, Railway y Sentry
+# Los archivos de bloqueo (package-lock.json, pnpm-lock.yaml, yarn.lock) y
+# las migraciones de Prisma SÍ se versionan.
+# ---------------------------------------------------------------------------
+
+# Dependencias
+node_modules/
+.pnpm-store/
+.yarn/*
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/versions/
+.pnp.*
+
+# Variables de entorno y secretos (solo se versionan las plantillas)
+.env
+.env.*
+!.env.example
+*.pem
+.sentryclirc
+
+# Compilación y salidas
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Next.js
+.next/
+next-env.d.ts
+
+# Cliente generado por Prisma
+**/generated/prisma/
+
+# Pruebas y cobertura
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+
+# Cachés
+.cache/
+.turbo/
+.eslintcache
+.stylelintcache
+
+# Registros y archivos de ejecución
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.pid
+
+# Datos locales de PostgreSQL y Redis, y volcados
+pgdata/
+postgres-data/
+redis-data/
+dump.rdb
+appendonly.aof
+*.dump
+
+# Configuración local de contenedores y plataformas de despliegue
+docker-compose.override.yml
+compose.override.yaml
+.vercel/
+.railway/
+
+# Python (validadores de Tools/)
+__pycache__/
+*.py[cod]
+.venv/
+
+# Editores y sistema operativo
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db

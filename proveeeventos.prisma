@@ -1,0 +1,2626 @@
+// ProveeEventos — esquema Prisma (Prisma ORM 7.10.1)
+// Fuente de verdad: ProveeEventos_TDD.md §4 (mapeo en §4.4). Archivo ensamblado desde Plans/Plan0005_work/prisma/: no editar a mano.
+// Los objetos que Prisma no administra (CHECK, exclusiones, triggers, privilegios, RLS y extensiones) están en proveeeventos.sql;
+// cada modelo afectado cita sus bloques SQL-nnn.
+// Las URL de conexión NO van aquí (Prisma 7): prisma.config.ts usa DIRECT_URL para la CLI y el driver adapter usa DATABASE_URL.
+
+/// TDD §4.4. partialIndexes es la única función preliminar (R-11).
+generator client {
+  provider        = "prisma-client"
+  output          = "./generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+/// TDD §4.4. Las extensiones se crean con SQL-001..SQL-004 antes del SQL base.
+datasource db {
+  provider = "postgresql"
+}
+
+// ===== Enums (TDD §4.2; valores según DEC-022) =====
+
+/// TDD §4.2. Módulo identity-access. Fuente: OpenAPI CurrentUser
+enum UserStatus {
+  ACTIVO
+  SUSPENDIDO
+  PENDIENTE_VERIFICACION_EMAIL
+
+  @@map("user_status")
+}
+
+/// TDD §4.2. Módulo identity-access. Fuente: DEC-022
+enum GlobalRole {
+  PROVEEDOR
+  ADMIN_PLATAFORMA
+
+  @@map("global_role")
+}
+
+/// TDD §4.2. Módulo identity-access. Fuente: SRS-NFR-PRIV-006
+enum ConsentType {
+  TERMINOS
+  PRIVACIDAD
+
+  @@map("consent_type")
+}
+
+/// TDD §4.2. Módulo identity-access. Fuente: SRS-NFR-PRIV-006
+enum ConsentSubjectType {
+  EMPRESA
+  PROVEEDOR
+  USUARIO
+
+  @@map("consent_subject_type")
+}
+
+/// TDD §4.2. Módulo organizations. Fuente: OpenAPI Organization
+enum OrganizationStatus {
+  PENDIENTE_VERIFICACION_EMAIL
+  ACTIVO
+  SUSPENDIDO
+
+  @@map("organization_status")
+}
+
+/// TDD §4.2. Módulo organizations. Fuente: DEC-022
+enum MembershipRole {
+  PROPIETARIO
+  ADMIN_EMPRESA
+  COORDINADOR
+  COORDINADOR_RESTRINGIDO
+
+  @@map("membership_role")
+}
+
+/// TDD §4.2. Módulo organizations. Fuente: DDD §5.3
+enum MembershipStatus {
+  INVITADO
+  ACTIVO
+  SUSPENDIDO
+
+  @@map("membership_status")
+}
+
+/// TDD §4.2. Módulo organizations. Fuente: OpenAPI Invitation
+enum InvitationStatus {
+  PENDIENTE
+  ACEPTADA
+  EXPIRADA
+  REVOCADA
+
+  @@map("invitation_status")
+}
+
+/// TDD §4.2. Módulo organizations. Fuente: OpenAPI OwnershipTransfer
+enum OwnershipTransferStatus {
+  PENDIENTE
+  ACEPTADA
+  RECHAZADA
+  EXPIRADA
+
+  @@map("ownership_transfer_status")
+}
+
+/// TDD §4.2. Módulo organizations. Fuente: DEC-029
+enum PlanCode {
+  PRUEBA
+  BASICO
+  PRO
+  ENTERPRISE
+
+  @@map("plan_code")
+}
+
+/// TDD §4.2. Módulo organizations. Fuente: SRS-TEN-003
+enum PlanLimitResource {
+  EVENTOS_ACTIVOS
+  COTIZACIONES_MENSUALES
+  COORDINADORES
+  PLANTILLAS_PERSONALIZADAS
+
+  @@map("plan_limit_resource")
+}
+
+/// TDD §4.2. Módulo taxonomy-templates. Fuente: OpenAPI EventTemplate
+enum TemplateScope {
+  GLOBAL
+  EMPRESA
+
+  @@map("template_scope")
+}
+
+/// TDD §4.2. Módulo provider-catalog. Fuente: OpenAPI ProviderRegistration
+enum ProviderType {
+  PERSONA_NATURAL
+  EMPRESA
+
+  @@map("provider_type")
+}
+
+/// TDD §4.2. Módulo provider-catalog. Fuente: SRS-CAT-008
+enum ContactChannel {
+  EMAIL_FORM
+  WHATSAPP
+  AMBOS
+
+  @@map("contact_channel")
+}
+
+/// TDD §4.2. Módulo provider-catalog. Fuente: DEC-031
+enum VerificationStatus {
+  PENDIENTE
+  VERIFICADO
+  RECHAZADO
+
+  @@map("verification_status")
+}
+
+/// TDD §4.2. Módulo provider-catalog. Fuente: DEC-031
+enum AccountStatus {
+  ACTIVO
+  SUSPENDIDO
+
+  @@map("account_status")
+}
+
+/// TDD §4.2. Módulo provider-catalog. Fuente: OpenAPI updateProviderVerification
+enum EvidenceResult {
+  APROBADA
+  RECHAZADA
+
+  @@map("evidence_result")
+}
+
+/// TDD §4.2. Módulo provider-catalog. Fuente: PRD §9.2
+enum MediaType {
+  IMAGEN
+  VIDEO
+
+  @@map("media_type")
+}
+
+/// TDD §4.2. Módulo provider-catalog. Fuente: SRS-CAT-007
+enum BookingModality {
+  INSTANT_BOOK
+  E_RFQ
+
+  @@map("booking_modality")
+}
+
+/// TDD §4.2. Módulo provider-catalog. Fuente: DEC-010
+enum TaxMode {
+  INCLUIDO
+  NO_APLICA
+  POR_CONFIRMAR
+
+  @@map("tax_mode")
+}
+
+/// TDD §4.2. Módulo event-management. Fuente: SRS §9.4
+enum EventStatus {
+  BORRADOR
+  COTIZADO
+  ENVIADO
+  EN_PROGRESO
+  COMPLETADO
+  CANCELADO
+
+  @@map("event_status")
+}
+
+/// TDD §4.2. Módulo availability-booking. Fuente: SRS §9.5
+enum BookingStatus {
+  CONFIRMADO
+  CANCELACION_SOLICITADA
+  CANCELACION_EN_REVISION
+  CANCELADO
+  EN_PROGRESO
+  SERVICIO_REALIZADO
+  INCIDENCIA
+  COMPLETADO
+  NO_PRESTADO
+
+  @@map("booking_status")
+}
+
+/// TDD §4.2. Módulo availability-booking. Fuente: DDD §5.7
+enum BookingOrigin {
+  INSTANT_BOOK
+  RFQ_AWARD
+
+  @@map("booking_origin")
+}
+
+/// TDD §4.2. Módulo availability-booking. Fuente: SRS-BOOK-010
+enum CommissionStatus {
+  PENDIENTE
+  RETENIDA
+  DEVENGADA
+  NO_APLICA
+  REVERTIDA
+
+  @@map("commission_status")
+}
+
+/// TDD §4.2. Módulo availability-booking. Fuente: SRS-BOOK-009
+enum ReviewOrigin {
+  CONTRAPARTE
+  PLATAFORMA
+
+  @@map("review_origin")
+}
+
+/// TDD §4.2. Módulo availability-booking. Fuente: SRS-ADM-013
+enum SuspensionReviewDecision {
+  MANTENER
+  CANCELAR
+
+  @@map("suspension_review_decision")
+}
+
+/// TDD §4.2. Módulo availability-booking. Fuente: SRS-BOOK-007
+enum BookingParty {
+  ORGANIZADORA
+  PROVEEDOR
+  PLATAFORMA
+  SISTEMA
+
+  @@map("booking_party")
+}
+
+/// TDD §4.2. Módulo availability-booking. Fuente: SRS-BOOK-005; S-06
+enum ChangeProposalStatus {
+  PENDIENTE
+  ACEPTADA
+  RECHAZADA
+  RETIRADA
+
+  @@map("change_proposal_status")
+}
+
+/// TDD §4.2. Módulo rfq-offers. Fuente: SRS §9.2
+enum RfqStatus {
+  PENDIENTE_ENVIO
+  ENVIADO
+  RESPONDIDO
+  RECHAZADO
+  EXPIRADO
+  ADJUDICADO
+  NO_ADJUDICADO
+  ERROR_ENVIO
+  CANCELADO
+
+  @@map("rfq_status")
+}
+
+/// TDD §4.2. Módulo platform. Fuente: OpenAPI RfqRequest
+enum DispatchStatus {
+  PENDIENTE
+  ACEPTADO
+  ENTREGADO
+  REBOTADO
+  FALLIDO
+  NO_APLICA
+
+  @@map("dispatch_status")
+}
+
+/// TDD §4.2. Módulo rfq-offers. Fuente: SRS-MAGIC-002
+enum MagicLinkStatus {
+  ACTIVO
+  CONSUMIDO
+  REVOCADO
+  EXPIRADO
+
+  @@map("magic_link_status")
+}
+
+/// TDD §4.2. Módulo rfq-offers. Fuente: OpenAPI RfqResponseInput
+enum OfferDecision {
+  OFERTA
+  RECHAZO
+
+  @@map("offer_decision")
+}
+
+/// TDD §4.2. Módulo rfq-offers. Fuente: OpenAPI RfqResponseInput
+enum OfferAvailability {
+  DISPONIBLE
+  NO_DISPONIBLE
+  CONDICIONAL
+
+  @@map("offer_availability")
+}
+
+/// TDD §4.2. Módulo rfq-offers. Fuente: DEC-022
+enum OfferOrigin {
+  EMAIL_MAGIC_LINK
+  PORTAL_PROVEEDOR
+  WHATSAPP_IA_ASISTIDO
+
+  @@map("offer_origin")
+}
+
+/// TDD §4.2. Módulo rfq-offers. Fuente: SRS §9.7
+enum OfferStatus {
+  RECIBIDA
+  REEMPLAZADA
+  ADJUDICADA
+  NO_ADJUDICADA
+  INVALIDADA
+  VENCIDA
+
+  @@map("offer_status")
+}
+
+/// TDD §4.2. Módulo quotation. Fuente: SRS §9.6
+enum QuotationStatus {
+  BORRADOR
+  GENERADA
+  ENVIADA
+  CERRADA
+
+  @@map("quotation_status")
+}
+
+/// TDD §4.2. Módulo quotation. Fuente: SRS §9.3
+enum ItemTrackingStatus {
+  COTIZADO
+  ENVIADO
+  CONFIRMADO
+  RECHAZADO
+  EN_PROGRESO
+  COMPLETADO
+  CALIFICADO
+  CANCELADO
+  EXPIRADO
+  NO_ADJUDICADO
+
+  @@map("item_tracking_status")
+}
+
+/// TDD §4.2. Módulo quotation. Fuente: OpenAPI QuotationItem
+enum PriceKind {
+  ESTIMADO
+  VINCULANTE
+
+  @@map("price_kind")
+}
+
+/// TDD §4.2. Módulo quotation. Fuente: OpenAPI QuotationOption
+enum AvailabilityHint {
+  DISPONIBLE
+  SIN_CAPACIDAD
+  DESCONOCIDA
+
+  @@map("availability_hint")
+}
+
+/// TDD §4.2. Módulo quotation. Fuente: SRS-QUO-012
+enum SnapshotTrigger {
+  GENERACION_PDF
+  ENVIO_RFQ
+
+  @@map("snapshot_trigger")
+}
+
+/// TDD §4.2. Módulo quotation. Fuente: OpenAPI DocumentJob
+enum DocumentJobStatus {
+  PENDIENTE
+  PROCESANDO
+  COMPLETADO
+  FALLIDO
+
+  @@map("document_job_status")
+}
+
+/// TDD §4.2. Módulo reviews. Fuente: OpenAPI Review
+enum ReviewStatus {
+  VISIBLE
+  OCULTA
+
+  @@map("review_status")
+}
+
+/// TDD §4.2. Módulo reviews. Fuente: SRS-REV-008
+enum ReviewReportReason {
+  OFENSIVO
+  FALSO
+  DATOS_PERSONALES
+  OTRO
+
+  @@map("review_report_reason")
+}
+
+/// TDD §4.2. Módulo reviews. Fuente: OpenAPI ReviewReport
+enum ReviewReportStatus {
+  PENDIENTE
+  RESUELTO
+
+  @@map("review_report_status")
+}
+
+/// TDD §4.2. Módulo reviews. Fuente: OpenAPI resolveReviewReport
+enum ModerationDecision {
+  OCULTAR
+  MANTENER
+
+  @@map("moderation_decision")
+}
+
+/// TDD §4.2. Módulo messaging-notifications. Fuente: DDD §5.1
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+
+  @@map("notification_channel")
+}
+
+/// TDD §4.2. Módulo messaging-notifications. Fuente: OpenAPI NotificationPreferences
+enum NotificationCategory {
+  CUENTA_Y_SEGURIDAD
+  SOLICITUDES_RFQ
+  RESPUESTAS_Y_OFERTAS
+  RESERVAS_Y_CANCELACIONES
+  CIERRE_DE_SERVICIO
+  RECORDATORIOS_DE_EVENTO
+  CALIFICACIONES
+  NOVEDADES_DE_PLATAFORMA
+
+  @@map("notification_category")
+}
+
+/// TDD §4.2. Módulo administration-audit. Fuente: OpenAPI DisputeDecision
+enum DisputeDecision {
+  CANCELAR
+  MANTENER
+  COMPLETAR
+  NO_PRESTADO
+
+  @@map("dispute_decision")
+}
+
+/// TDD §4.2. Módulo administration-audit. Fuente: OpenAPI DataRequestType
+enum DataRequestType {
+  CONSULTA
+  CORRECCION
+  SUPRESION
+
+  @@map("data_request_type")
+}
+
+/// TDD §4.2. Módulo administration-audit. Fuente: SRS-ADM-012
+enum DataRequestStatus {
+  RECIBIDA
+  EN_TRAMITE
+  RESUELTA
+  RECHAZADA
+
+  @@map("data_request_status")
+}
+
+/// TDD §4.2. Módulo administration-audit. Fuente: SRS-ADM-012; H-17
+enum LegalHoldResourceType {
+  EVENTO
+  CONTRATACION
+  OFERTA
+  RESENA
+  USUARIO
+  EMPRESA
+
+  @@map("legal_hold_resource_type")
+}
+
+/// TDD §4.2. Módulo administration-audit. Fuente: OpenAPI AuditLog
+enum AuditResult {
+  EXITO
+  FALLO
+
+  @@map("audit_result")
+}
+
+/// TDD §4.2. Módulo administration-audit. Fuente: DEC-003
+enum RetentionAction {
+  ARCHIVO
+  ANONIMIZACION
+  ELIMINACION
+
+  @@map("retention_action")
+}
+
+/// TDD §4.2. Módulo platform. Fuente: SAD §7.4
+enum OutboxStatus {
+  PENDIENTE
+  PUBLICADO
+  FALLIDO
+
+  @@map("outbox_status")
+}
+
+/// TDD §4.2. Módulo platform. Fuente: SAD §10.6
+enum IdempotencyStatus {
+  EN_PROCESO
+  COMPLETADA
+
+  @@map("idempotency_status")
+}
+
+// ===== Módulo 01: identity-access (TDD §4.2.1) =====
+
+/// TDD §4.2.1 y §4.3.1. Fuente: DDD §4.2; SRS-AUTH-003; OpenAPI CurrentUser
+/// Identidad interna de cada persona, vinculada a Auth0. Es global: puede tener membresías en varias empresas o un perfil de proveedor.
+// SQL-020 CHECK: ck_users__suspension
+model User {
+  id               String     @id(map: "pk_users") @default(uuid(7)) @db.Uuid
+  authSubject      String     @map("auth_subject")
+  email            String     @db.Citext
+  displayName      String?    @map("display_name") @db.VarChar(160)
+  phone            String?    @db.VarChar(40)
+  status           UserStatus @default(PENDIENTE_VERIFICACION_EMAIL)
+  emailVerifiedAt  DateTime?  @map("email_verified_at") @db.Timestamptz(6)
+  suspendedAt      DateTime?  @map("suspended_at") @db.Timestamptz(6)
+  suspensionReason String?    @map("suspension_reason") @db.VarChar(1000)
+  anonymizedAt     DateTime?  @map("anonymized_at") @db.Timestamptz(6)
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  userGlobalRoles         UserGlobalRole[]         @relation("fk_user_global_roles__users")
+  consentRecords          ConsentRecord[]          @relation("fk_consent_records__users")
+  memberships             Membership[]             @relation("fk_memberships__users")
+  provider                Provider?                @relation("fk_providers__users")
+  notifications           Notification[]           @relation("fk_notifications__users")
+  notificationPreferences NotificationPreference[] @relation("fk_notification_preferences__users")
+  dataSubjectRequests     DataSubjectRequest[]     @relation("fk_data_subject_requests__users")
+
+  @@unique([email], map: "uq_users__email")
+  @@unique([authSubject], map: "uq_users__auth_subject")
+  @@map("users")
+}
+
+/// TDD §4.2.1 y §4.3.1. Fuente: DDD §4.2; DEC-022
+/// Roles globales de un usuario, con su revocación.
+// SQL-420 trigger: trg_user_global_roles__sin_borrado
+model UserGlobalRole {
+  id              String     @id(map: "pk_user_global_roles") @default(uuid(7)) @db.Uuid
+  userId          String     @map("user_id") @db.Uuid
+  role            GlobalRole
+  grantedByUserId String?    @map("granted_by_user_id") @db.Uuid
+  revokedAt       DateTime?  @map("revoked_at") @db.Timestamptz(6)
+  revokedByUserId String?    @map("revoked_by_user_id") @db.Uuid
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation("fk_user_global_roles__users", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_user_global_roles__users")
+
+  @@unique([userId, role], where: raw("revoked_at IS NULL"), map: "uq_user_global_roles__user_id_role")
+  @@map("user_global_roles")
+}
+
+/// TDD §4.2.1 y §4.3.1. Fuente: SRS-NFR-PRIV-001; SRS-NFR-PRIV-006; DEC-003
+/// Evidencia de cada aceptación de términos y de la política de datos.
+// SQL-021 CHECK: ck_consent_records__sujeto
+// SQL-421 trigger: trg_consent_records__inmutable
+model ConsentRecord {
+  id            String             @id(map: "pk_consent_records") @default(uuid(7)) @db.Uuid
+  userId        String             @map("user_id") @db.Uuid
+  subjectType   ConsentSubjectType @map("subject_type")
+  /// Referencia lógica a organizations.id (ADR-DATA-03): Polimórfica (empresa o proveedor) y contra la matriz: `identity-access` no depende de nadie
+  subjectId     String?            @map("subject_id") @db.Uuid
+  consentType   ConsentType        @map("consent_type")
+  noticeVersion String             @map("notice_version")
+  acceptedAt    DateTime           @map("accepted_at") @db.Timestamptz(6)
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation("fk_consent_records__users", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_consent_records__users")
+
+  @@index([userId, acceptedAt], map: "ix_consent_records__user_id_accepted_at")
+  @@map("consent_records")
+}
+
+// ===== Módulo 02: organizations (TDD §4.2.2) =====
+
+/// TDD §4.2.2 y §4.3.2. Fuente: DDD §5.2; SRS-AUTH-001; SRS-TEN-005
+/// Empresa organizadora. Es el tenant: su `id` es el valor de `organization_id` en el resto del modelo.
+// SQL-030 CHECK: ck_organizations__suspension
+// SQL-510 RLS (migración 20, TDD §5.2)
+model Organization {
+  id                 String             @id(map: "pk_organizations") @default(uuid(7)) @db.Uuid
+  legalName          String             @map("legal_name") @db.VarChar(200)
+  tradeName          String?            @map("trade_name") @db.VarChar(200)
+  taxId              String             @map("tax_id") @db.VarChar(40)
+  contactName        String             @map("contact_name") @db.VarChar(160)
+  contactEmail       String             @map("contact_email") @db.Citext
+  phone              String             @db.VarChar(40)
+  city               String             @db.VarChar(120)
+  status             OrganizationStatus @default(PENDIENTE_VERIFICACION_EMAIL)
+  suspendedAt        DateTime?          @map("suspended_at") @db.Timestamptz(6)
+  suspensionReason   String?            @map("suspension_reason") @db.VarChar(1000)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor (ADR-DATA-03)
+  registeredByUserId String             @map("registered_by_user_id") @db.Uuid
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  memberships       Membership[]       @relation("fk_memberships__organizations")
+  organizationPlans OrganizationPlan[] @relation("fk_organization_plans__organizations")
+  planUsageCounters PlanUsageCounter[] @relation("fk_plan_usage_counters__organizations")
+  eventTemplates    EventTemplate[]    @relation("fk_event_templates__organizations")
+  whatsappTemplates WhatsappTemplate[] @relation("fk_whatsapp_templates__organizations")
+  events            Event[]            @relation("fk_events__organizations")
+  bookings          Booking[]          @relation("fk_bookings__organizations")
+  rfqItems          RfqItem[]          @relation("fk_rfq_items__organizations")
+  quickQuotations   QuickQuotation[]   @relation("fk_quick_quotations__organizations")
+  notifications     Notification[]     @relation("fk_notifications__organizations")
+
+  @@unique([taxId], map: "uq_organizations__tax_id")
+  @@map("organizations")
+}
+
+/// TDD §4.2.2 y §4.3.2. Fuente: DDD §5.3; SRS-AUTH-006; SRS-AUTH-009
+/// Vínculo de una persona con una empresa y su rol. Existe desde la invitación, antes de que haya usuario (H-11).
+// SQL-031 CHECK: ck_memberships__usuario
+// SQL-511 RLS (migración 20, TDD §5.2)
+model Membership {
+  id             String           @id(map: "pk_memberships") @default(uuid(7)) @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  userId         String?          @map("user_id") @db.Uuid
+  email          String           @db.Citext
+  displayName    String?          @map("display_name") @db.VarChar(160)
+  role           MembershipRole
+  status         MembershipStatus @default(INVITADO)
+  invitedAt      DateTime?        @map("invited_at") @db.Timestamptz(6)
+  acceptedAt     DateTime?        @map("accepted_at") @db.Timestamptz(6)
+  suspendedAt    DateTime?        @map("suspended_at") @db.Timestamptz(6)
+  removedAt      DateTime?        @map("removed_at") @db.Timestamptz(6)
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization                       Organization        @relation("fk_memberships__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_memberships__organizations")
+  user                               User?               @relation("fk_memberships__users", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_memberships__users")
+  invitations                        Invitation[]        @relation("fk_invitations__memberships")
+  ownershipTransfersAsFromMembership OwnershipTransfer[] @relation("fk_ownership_transfers__memberships__from_membership_id")
+  ownershipTransfersAsToMembership   OwnershipTransfer[] @relation("fk_ownership_transfers__memberships__to_membership_id")
+  events                             Event[]             @relation("fk_events__memberships")
+  eventAssignments                   EventAssignment[]   @relation("fk_event_assignments__memberships")
+
+  @@unique([organizationId, id], map: "uq_memberships__organization_id_id")
+  @@unique([organizationId, userId], where: raw("removed_at IS NULL AND user_id IS NOT NULL"), map: "uq_memberships__active_user")
+  @@unique([organizationId, email], where: raw("removed_at IS NULL"), map: "uq_memberships__active_email")
+  @@unique([organizationId], where: raw("role = 'PROPIETARIO' AND removed_at IS NULL"), map: "uq_memberships__single_owner")
+  @@index([organizationId, createdAt, id], map: "ix_memberships__organization_id_created_at_id")
+  @@index([userId, status], map: "ix_memberships__user_id_status")
+  @@map("memberships")
+}
+
+/// TDD §4.2.2 y §4.3.2. Fuente: DDD §4.3; SRS-AUTH-006
+/// Invitación de un solo uso; solo guarda el hash del token.
+// SQL-032 CHECK: ck_invitations__token
+// SQL-512 RLS (migración 20, TDD §5.2)
+model Invitation {
+  id               String           @id(map: "pk_invitations") @default(uuid(7)) @db.Uuid
+  organizationId   String           @map("organization_id") @db.Uuid
+  membershipId     String           @map("membership_id") @db.Uuid
+  role             MembershipRole
+  email            String           @db.Citext
+  tokenNonce       Bytes            @map("token_nonce")
+  tokenHash        Bytes            @map("token_hash")
+  secretKeyVersion Int              @map("secret_key_version") @db.SmallInt
+  status           InvitationStatus @default(PENDIENTE)
+  expiresAt        DateTime         @map("expires_at") @db.Timestamptz(6)
+  acceptedAt       DateTime?        @map("accepted_at") @db.Timestamptz(6)
+  revokedAt        DateTime?        @map("revoked_at") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  invitedByUserId  String           @map("invited_by_user_id") @db.Uuid
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  membership Membership @relation("fk_invitations__memberships", fields: [organizationId, membershipId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_invitations__memberships")
+
+  @@unique([tokenHash], map: "uq_invitations__token_hash")
+  @@unique([membershipId], where: raw("status = 'PENDIENTE'"), map: "uq_invitations__pending")
+  @@index([organizationId, membershipId], map: "ix_invitations__organization_id_membership_id")
+  @@index([expiresAt], where: raw("status = 'PENDIENTE'"), map: "ix_invitations__expiry")
+  @@map("invitations")
+}
+
+/// TDD §4.2.2 y §4.3.2. Fuente: DDD §4.3; SRS-AUTH-009
+/// Transferencia de propiedad pendiente de aceptación (E2).
+// SQL-033 CHECK: ck_ownership_transfers__partes
+// SQL-513 RLS (migración 20, TDD §5.2)
+model OwnershipTransfer {
+  id                String                  @id(map: "pk_ownership_transfers") @default(uuid(7)) @db.Uuid
+  organizationId    String                  @map("organization_id") @db.Uuid
+  fromMembershipId  String                  @map("from_membership_id") @db.Uuid
+  toMembershipId    String                  @map("to_membership_id") @db.Uuid
+  status            OwnershipTransferStatus @default(PENDIENTE)
+  expiresAt         DateTime                @map("expires_at") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  requestedByUserId String                  @map("requested_by_user_id") @db.Uuid
+  respondedAt       DateTime?               @map("responded_at") @db.Timestamptz(6)
+  createdAt         DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  fromMembership Membership @relation("fk_ownership_transfers__memberships__from_membership_id", fields: [organizationId, fromMembershipId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_ownership_transfers__memberships__from_membership_id")
+  toMembership   Membership @relation("fk_ownership_transfers__memberships__to_membership_id", fields: [organizationId, toMembershipId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_ownership_transfers__memberships__to_membership_id")
+
+  @@unique([organizationId], where: raw("status = 'PENDIENTE'"), map: "uq_ownership_transfers__pending")
+  @@index([organizationId, fromMembershipId], map: "ix_ownership_transfers__organization_id_from_membership_id")
+  @@index([organizationId, toMembershipId], map: "ix_ownership_transfers__organization_id_to_membership_id")
+  @@index([expiresAt], where: raw("status = 'PENDIENTE'"), map: "ix_ownership_transfers__expiry")
+  @@map("ownership_transfers")
+}
+
+/// TDD §4.2.2 y §4.3.2. Fuente: SRS-TEN-004; DEC-029; PRD §14.1
+/// Definición versionada de cada plan, con precio y límites. Un límite nulo es ilimitado.
+// SQL-034 CHECK: ck_plans__limites
+// SQL-035 CHECK: ck_plans__precio
+// SQL-036 CHECK: ck_plans__vigencia
+model Plan {
+  id                   String    @id(map: "pk_plans") @default(uuid(7)) @db.Uuid
+  code                 PlanCode
+  revision             Int
+  name                 String
+  monthlyPrice         Decimal   @map("monthly_price") @db.Decimal(14, 2)
+  currency             String    @default("COP") @db.Char(3)
+  maxActiveEvents      Int?      @map("max_active_events")
+  maxMonthlyQuotations Int?      @map("max_monthly_quotations")
+  maxCoordinators      Int?      @map("max_coordinators")
+  maxCustomTemplates   Int?      @map("max_custom_templates")
+  trialDays            Int?      @map("trial_days")
+  validFrom            DateTime  @map("valid_from") @db.Date
+  validUntil           DateTime? @map("valid_until") @db.Date
+  active               Boolean   @default(true)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organizationPlans OrganizationPlan[] @relation("fk_organization_plans__plans")
+
+  @@unique([code, revision], map: "uq_plans__code_revision")
+  @@index([code, validFrom], map: "ix_plans__code_valid_from")
+  @@map("plans")
+}
+
+/// TDD §4.2.2 y §4.3.2. Fuente: SRS-ADM-009; OpenAPI PlanAssignment
+/// Plan asignado a una empresa en un periodo; los periodos no se solapan.
+// SQL-037 CHECK: ck_organization_plans__periodo
+// SQL-038 exclusión: ex_organization_plans__sin_solape
+// SQL-514 RLS (migración 20, TDD §5.2)
+model OrganizationPlan {
+  id               String    @id(map: "pk_organization_plans") @default(uuid(7)) @db.Uuid
+  organizationId   String    @map("organization_id") @db.Uuid
+  planId           String    @map("plan_id") @db.Uuid
+  validFrom        DateTime  @map("valid_from") @db.Timestamptz(6)
+  validUntil       DateTime? @map("valid_until") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  assignedByUserId String?   @map("assigned_by_user_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation("fk_organization_plans__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_organization_plans__organizations")
+  plan         Plan         @relation("fk_organization_plans__plans", fields: [planId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_organization_plans__plans")
+
+  @@index([organizationId, validFrom(sort: Desc)], map: "ix_organization_plans__organization_id_valid_from")
+  @@map("organization_plans")
+}
+
+/// TDD §4.2.2 y §4.3.2. Fuente: SRS-TEN-003; SAD §4.4; H-22
+/// Consumo acumulado por recurso limitado. La fila se bloquea al incrementar, lo que serializa los límites sin leer tablas de otros módulos (ADR-DATA-07).
+// SQL-039 CHECK: ck_plan_usage_counters__consumo
+// SQL-515 RLS (migración 20, TDD §5.2)
+model PlanUsageCounter {
+  organizationId String            @map("organization_id") @db.Uuid
+  resource       PlanLimitResource
+  periodStart    DateTime          @map("period_start") @db.Date
+  used           Int               @default(0)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization @relation("fk_plan_usage_counters__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_plan_usage_counters__organizations")
+
+  @@id([organizationId, resource, periodStart], map: "pk_plan_usage_counters")
+  @@map("plan_usage_counters")
+}
+
+// ===== Módulo 03: taxonomy-templates (TDD §4.2.3) =====
+
+/// TDD §4.2.3 y §4.3.3. Fuente: SRS-CAT-003; DEC-020; PRD Anexo B
+/// Categorías principales de la taxonomía global.
+model Category {
+  id        String   @id(map: "pk_categories") @default(uuid(7)) @db.Uuid
+  code      String   @db.VarChar(30)
+  name      String   @db.VarChar(120)
+  active    Boolean  @default(true)
+  sortOrder Int?     @map("sort_order") @db.SmallInt
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  subtypes                Subtype[]                @relation("fk_subtypes__categories")
+  eventTemplateSelections EventTemplateSelection[] @relation("fk_event_template_selections__categories")
+  whatsappTemplates       WhatsappTemplate[]       @relation("fk_whatsapp_templates__categories")
+  providerCategories      ProviderCategory[]       @relation("fk_provider_categories__categories")
+  servicePackages         ServicePackage[]         @relation("fk_service_packages__categories")
+  eventCategories         EventCategory[]          @relation("fk_event_categories__categories")
+  quotationItems          QuotationItem[]          @relation("fk_quotation_items__categories")
+  quickQuotations         QuickQuotation[]         @relation("fk_quick_quotations__categories")
+
+  @@unique([code], map: "uq_categories__code")
+  @@map("categories")
+}
+
+/// TDD §4.2.3 y §4.3.3. Fuente: SRS-CAT-004; DEC-020; H-12
+/// Especialización de una categoría.
+model Subtype {
+  id          String   @id(map: "pk_subtypes") @default(uuid(7)) @db.Uuid
+  categoryId  String   @map("category_id") @db.Uuid
+  code        String   @db.VarChar(30)
+  name        String   @db.VarChar(120)
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  category                Category                 @relation("fk_subtypes__categories", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_subtypes__categories")
+  eventTemplateSelections EventTemplateSelection[] @relation("fk_event_template_selections__subtypes")
+  providerSubtypes        ProviderSubtype[]        @relation("fk_provider_subtypes__subtypes")
+  servicePackages         ServicePackage[]         @relation("fk_service_packages__subtypes")
+  eventCategories         EventCategory[]          @relation("fk_event_categories__subtypes")
+  quotationItems          QuotationItem[]          @relation("fk_quotation_items__subtypes")
+  quotationItemSubtypes   QuotationItemSubtype[]   @relation("fk_quotation_item_subtypes__subtypes")
+  quickQuotations         QuickQuotation[]         @relation("fk_quick_quotations__subtypes")
+
+  @@unique([code], map: "uq_subtypes__code")
+  @@unique([categoryId, id], map: "uq_subtypes__category_id_id")
+  @@map("subtypes")
+}
+
+/// TDD §4.2.3 y §4.3.3. Fuente: SRS-EVT-002; SRS-EVT-004; DDD §4.5
+/// Plantilla de evento global o privada de una empresa.
+// SQL-060 CHECK: ck_event_templates__alcance
+// SQL-516 RLS (migración 20, TDD §5.2)
+model EventTemplate {
+  id                       String        @id(map: "pk_event_templates") @default(uuid(7)) @db.Uuid
+  scope                    TemplateScope
+  organizationId           String?       @map("organization_id") @db.Uuid
+  name                     String        @db.VarChar(160)
+  active                   Boolean       @default(true)
+  version                  Int           @default(1)
+  duplicatedFromTemplateId String?       @map("duplicated_from_template_id") @db.Uuid
+  createdAt                DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization                                    Organization?            @relation("fk_event_templates__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_event_templates__organizations")
+  duplicatedFromTemplate                          EventTemplate?           @relation("fk_event_templates__event_templates", fields: [duplicatedFromTemplateId], references: [id], onDelete: SetNull, onUpdate: Restrict, map: "fk_event_templates__event_templates")
+  eventTemplates                                  EventTemplate[]          @relation("fk_event_templates__event_templates")
+  eventTemplateSelectionsAsTemplate               EventTemplateSelection[] @relation("fk_event_template_selections__event_templates__template_id")
+  eventTemplateSelectionsAsTemplateByOrganization EventTemplateSelection[] @relation("fk_event_template_selections__event_templates__org_template_id")
+  events                                          Event[]                  @relation("fk_events__event_templates")
+  quotations                                      Quotation[]              @relation("fk_quotations__event_templates")
+
+  @@unique([organizationId, id], map: "uq_event_templates__organization_id_id")
+  @@index([organizationId, active, name], map: "ix_event_templates__organization_id_active_name")
+  @@map("event_templates")
+}
+
+/// TDD §4.2.3 y §4.3.3. Fuente: DDD §4.5; OpenAPI EventTemplateInput
+/// Categorías y subtipos recomendados por una plantilla; se reemplazan en bloque.
+// SQL-517 RLS (migración 20, TDD §5.2)
+model EventTemplateSelection {
+  id             String   @id(map: "pk_event_template_selections") @default(uuid(7)) @db.Uuid
+  templateId     String   @map("template_id") @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  categoryId     String   @map("category_id") @db.Uuid
+  subtypeId      String?  @map("subtype_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  template               EventTemplate  @relation("fk_event_template_selections__event_templates__template_id", fields: [templateId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_event_template_selections__event_templates__template_id")
+  templateByOrganization EventTemplate? @relation("fk_event_template_selections__event_templates__org_template_id", fields: [organizationId, templateId], references: [organizationId, id], onDelete: Cascade, onUpdate: Restrict, map: "fk_event_template_selections__event_templates__org_template_id")
+  category               Category       @relation("fk_event_template_selections__categories", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_event_template_selections__categories")
+  subtype                Subtype?       @relation("fk_event_template_selections__subtypes", fields: [categoryId, subtypeId], references: [categoryId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_event_template_selections__subtypes")
+
+  @@unique([templateId, categoryId], where: raw("subtype_id IS NULL"), map: "uq_event_template_selections__category")
+  @@unique([templateId, categoryId, subtypeId], where: raw("subtype_id IS NOT NULL"), map: "uq_event_template_selections__subtype")
+  @@index([templateId], map: "ix_event_template_selections__template_id")
+  @@index([organizationId, templateId], map: "ix_event_template_selections__organization_id_template_id")
+  @@map("event_template_selections")
+}
+
+/// TDD §4.2.3 y §4.3.3. Fuente: SRS-WA-001; SRS-ADM-004; PRD Anexo D
+/// Plantilla de mensaje WhatsApp global o personalizada.
+// SQL-061 CHECK: ck_whatsapp_templates__alcance
+// SQL-518 RLS (migración 20, TDD §5.2)
+model WhatsappTemplate {
+  id             String        @id(map: "pk_whatsapp_templates") @default(uuid(7)) @db.Uuid
+  scope          TemplateScope
+  organizationId String?       @map("organization_id") @db.Uuid
+  categoryId     String        @map("category_id") @db.Uuid
+  code           String?       @db.VarChar(30)
+  name           String
+  body           String        @db.VarChar(4000)
+  active         Boolean       @default(true)
+  baseTemplateId String?       @map("base_template_id") @db.Uuid
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization      Organization?      @relation("fk_whatsapp_templates__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_whatsapp_templates__organizations")
+  category          Category           @relation("fk_whatsapp_templates__categories", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_whatsapp_templates__categories")
+  baseTemplate      WhatsappTemplate?  @relation("fk_whatsapp_templates__whatsapp_templates", fields: [baseTemplateId], references: [id], onDelete: SetNull, onUpdate: Restrict, map: "fk_whatsapp_templates__whatsapp_templates")
+  whatsappTemplates WhatsappTemplate[] @relation("fk_whatsapp_templates__whatsapp_templates")
+
+  @@unique([code], where: raw("code IS NOT NULL"), map: "uq_whatsapp_templates__code")
+  @@index([organizationId, categoryId, active], map: "ix_whatsapp_templates__organization_id_category_id_active")
+  @@map("whatsapp_templates")
+}
+
+// ===== Módulo 04: provider-catalog (TDD §4.2.4) =====
+
+/// TDD §4.2.4 y §4.3.4. Fuente: DDD §5.4; SRS-CAT-001; DEC-031
+/// Perfil comercial global de un proveedor, con verificación y estado de cuenta independientes.
+// SQL-080 CHECK: ck_providers__nivel
+// SQL-081 CHECK: ck_providers__capacidad
+// SQL-082 CHECK: ck_providers__suspension
+model Provider {
+  id                   String             @id(map: "pk_providers") @default(uuid(7)) @db.Uuid
+  userId               String             @map("user_id") @db.Uuid
+  businessName         String             @map("business_name") @db.VarChar(200)
+  providerType         ProviderType       @map("provider_type")
+  taxId                String?            @map("tax_id") @db.VarChar(40)
+  description          String?            @db.VarChar(5000)
+  city                 String             @db.VarChar(120)
+  phone                String             @db.VarChar(40)
+  whatsapp             String?            @db.VarChar(40)
+  contactEmail         String             @map("contact_email") @db.Citext
+  preferredChannel     ContactChannel     @default(EMAIL_FORM) @map("preferred_channel")
+  maxGuestCapacity     Int?               @map("max_guest_capacity")
+  verificationStatus   VerificationStatus @default(PENDIENTE) @map("verification_status")
+  verificationLevel    Int?               @map("verification_level") @db.SmallInt
+  accountStatus        AccountStatus      @default(ACTIVO) @map("account_status")
+  suspendedAt          DateTime?          @map("suspended_at") @db.Timestamptz(6)
+  suspensionReason     String?            @map("suspension_reason") @db.VarChar(1000)
+  submittedForReviewAt DateTime?          @map("submitted_for_review_at") @db.Timestamptz(6)
+  version              Int                @default(1)
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user                            User                             @relation("fk_providers__users", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_providers__users")
+  providerCategories              ProviderCategory[]               @relation("fk_provider_categories__providers")
+  providerCoverageAreas           ProviderCoverageArea[]           @relation("fk_provider_coverage_areas__providers")
+  portfolioAssets                 PortfolioAsset[]                 @relation("fk_portfolio_assets__providers")
+  servicePackages                 ServicePackage[]                 @relation("fk_service_packages__providers")
+  providerVerificationSubmissions ProviderVerificationSubmission[] @relation("fk_provider_verification_submissions__providers")
+  providerVerificationDecisions   ProviderVerificationDecision[]   @relation("fk_provider_verification_decisions__providers")
+  providerVerificationEvidences   ProviderVerificationEvidence[]   @relation("fk_provider_verification_evidence__providers")
+  providerReputation              ProviderReputation?              @relation("fk_provider_reputation__providers")
+  providerAvailability            ProviderAvailability?            @relation("fk_provider_availability__providers")
+  providerDailyCapacities         ProviderDailyCapacity[]          @relation("fk_provider_daily_capacity__providers")
+  bookings                        Booking[]                        @relation("fk_bookings__providers")
+  rfqRequests                     RfqRequest[]                     @relation("fk_rfq_requests__providers")
+
+  @@unique([userId], map: "uq_providers__user_id")
+  @@index([verificationStatus, accountStatus, createdAt], map: "ix_providers__verification_status_account_status_created_at")
+  @@map("providers")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: SRS-CAT-005
+/// Categorías principales del proveedor; la posición limita a cinco (ADR-DATA-08).
+// SQL-083 CHECK: ck_provider_categories__posicion
+model ProviderCategory {
+  providerId String   @map("provider_id") @db.Uuid
+  categoryId String   @map("category_id") @db.Uuid
+  position   Int      @db.SmallInt
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  provider         Provider          @relation("fk_provider_categories__providers", fields: [providerId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_provider_categories__providers")
+  category         Category          @relation("fk_provider_categories__categories", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_provider_categories__categories")
+  providerSubtypes ProviderSubtype[] @relation("fk_provider_subtypes__provider_categories")
+
+  @@id([providerId, categoryId], map: "pk_provider_categories")
+  @@unique([providerId, position], map: "uq_provider_categories__provider_id_position")
+  @@map("provider_categories")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: SRS-CAT-005; OpenAPI ProviderUpdate.subtypeIds
+/// Subtipos que ofrece el proveedor dentro de sus categorías.
+model ProviderSubtype {
+  providerId String   @map("provider_id") @db.Uuid
+  subtypeId  String   @map("subtype_id") @db.Uuid
+  categoryId String   @map("category_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  providerCategory ProviderCategory @relation("fk_provider_subtypes__provider_categories", fields: [providerId, categoryId], references: [providerId, categoryId], onDelete: Cascade, onUpdate: Restrict, map: "fk_provider_subtypes__provider_categories")
+  subtype          Subtype          @relation("fk_provider_subtypes__subtypes", fields: [categoryId, subtypeId], references: [categoryId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_provider_subtypes__subtypes")
+
+  @@id([providerId, subtypeId], map: "pk_provider_subtypes")
+  @@index([providerId, categoryId], map: "ix_provider_subtypes__provider_id_category_id")
+  @@map("provider_subtypes")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: DDD §4.4; OpenAPI ProviderUpdate.coverageAreas; DEC-015
+/// Zonas que cubre el proveedor.
+// SQL-084 CHECK: ck_provider_coverage_areas__coordenadas
+model ProviderCoverageArea {
+  id         String   @id(map: "pk_provider_coverage_areas") @default(uuid(7)) @db.Uuid
+  providerId String   @map("provider_id") @db.Uuid
+  areaName   String   @map("area_name")
+  areaKey    String   @map("area_key")
+  latitude   Decimal? @db.Decimal(9, 6)
+  longitude  Decimal? @db.Decimal(9, 6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  provider Provider @relation("fk_provider_coverage_areas__providers", fields: [providerId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_provider_coverage_areas__providers")
+
+  @@unique([providerId, areaKey], map: "uq_provider_coverage_areas__provider_id_area_key")
+  @@map("provider_coverage_areas")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: SRS-CAT-002; SAD §9.3; OpenAPI PortfolioMedia
+/// Referencia a un medio alojado en Cloudinary (máximo 20 imágenes y 5 videos).
+// SQL-085 CHECK: ck_portfolio_assets__tamano
+model PortfolioAsset {
+  id          String    @id(map: "pk_portfolio_assets") @default(uuid(7)) @db.Uuid
+  providerId  String    @map("provider_id") @db.Uuid
+  publicId    String    @map("public_id") @db.VarChar(200)
+  mediaType   MediaType @map("media_type")
+  url         String
+  description String?   @db.VarChar(300)
+  sortOrder   Int       @map("sort_order")
+  mimeType    String    @map("mime_type") @db.VarChar(100)
+  sizeBytes   BigInt    @map("size_bytes")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  provider Provider @relation("fk_portfolio_assets__providers", fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_portfolio_assets__providers")
+
+  @@unique([publicId], map: "uq_portfolio_assets__public_id")
+  @@index([providerId, sortOrder], map: "ix_portfolio_assets__provider_id_sort_order")
+  @@map("portfolio_assets")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: DDD §5.4; SRS-CAT-006; DEC-010
+/// Paquete de servicio con precio, condiciones, modalidad y tratamiento de impuestos.
+// SQL-086 CHECK: ck_service_packages__precios
+// SQL-087 CHECK: ck_service_packages__impuestos
+// SQL-088 CHECK: ck_service_packages__capacidad
+// SQL-095 CHECK: ck_service_packages__listas
+model ServicePackage {
+  id                   String          @id(map: "pk_service_packages") @default(uuid(7)) @db.Uuid
+  providerId           String          @map("provider_id") @db.Uuid
+  categoryId           String          @map("category_id") @db.Uuid
+  subtypeId            String          @map("subtype_id") @db.Uuid
+  name                 String          @db.VarChar(160)
+  description          String?         @db.VarChar(4000)
+  basePrice            Decimal         @map("base_price") @db.Decimal(14, 2)
+  pricePerPerson       Decimal?        @map("price_per_person") @db.Decimal(14, 2)
+  currency             String          @default("COP") @db.Char(3)
+  modality             BookingModality
+  taxMode              TaxMode         @map("tax_mode")
+  taxRate              Decimal?        @map("tax_rate") @db.Decimal(5, 4)
+  taxValidFrom         DateTime        @map("tax_valid_from") @db.Date
+  taxValidUntil        DateTime?       @map("tax_valid_until") @db.Date
+  inclusions           String[]        @default([])
+  exclusions           String[]        @default([])
+  packageCapacity      Int?            @map("package_capacity")
+  independentInventory Boolean         @default(false) @map("independent_inventory")
+  active               Boolean         @default(true)
+  publishedAt          DateTime?       @map("published_at") @db.Timestamptz(6)
+  version              Int             @default(1)
+  createdAt            DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  provider               Provider               @relation("fk_service_packages__providers", fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_service_packages__providers")
+  category               Category               @relation("fk_service_packages__categories", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_service_packages__categories")
+  subtype                Subtype                @relation("fk_service_packages__subtypes", fields: [categoryId, subtypeId], references: [categoryId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_service_packages__subtypes")
+  providerSearch         ProviderSearch?        @relation("fk_provider_search__service_packages")
+  packageDailyCapacities PackageDailyCapacity[] @relation("fk_package_daily_capacity__service_packages")
+  bookings               Booking[]              @relation("fk_bookings__service_packages")
+  quotationItems         QuotationItem[]        @relation("fk_quotation_items__service_packages")
+  quotationItemOptions   QuotationItemOption[]  @relation("fk_quotation_item_options__service_packages")
+  quickQuotationOptions  QuickQuotationOption[] @relation("fk_quick_quotation_options__service_packages")
+
+  @@unique([providerId, id], map: "uq_service_packages__provider_id_id")
+  @@index([providerId, active, createdAt], map: "ix_service_packages__provider_id_active_created_at")
+  @@index([categoryId, subtypeId, active], map: "ix_service_packages__category_id_subtype_id_active")
+  @@map("service_packages")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: SRS-ADM-001; OpenAPI submitProviderForReview
+/// Envío del perfil a revisión con la evidencia aportada.
+// SQL-089 CHECK: ck_provider_verification_submissions__evidencia
+// SQL-422 trigger: trg_provider_verification_submissions__inmutable
+model ProviderVerificationSubmission {
+  id                String   @id(map: "pk_provider_verification_submissions") @default(uuid(7)) @db.Uuid
+  providerId        String   @map("provider_id") @db.Uuid
+  evidence          Json
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  submittedByUserId String   @map("submitted_by_user_id") @db.Uuid
+  submittedAt       DateTime @map("submitted_at") @db.Timestamptz(6)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  provider                      Provider                       @relation("fk_provider_verification_submissions__providers", fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_provider_verification_submissions__providers")
+  providerVerificationDecisions ProviderVerificationDecision[] @relation("fk_provider_verification_decisions__verif_submissions")
+
+  @@index([providerId, submittedAt(sort: Desc)], map: "ix_provider_verification_submissions__provider_id_submitted_at")
+  @@map("provider_verification_submissions")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: DDD §4.13; SRS-ADM-001; DEC-009
+/// Decisión administrativa de verificación (H-07).
+// SQL-090 CHECK: ck_provider_verification_decisions__motivo
+// SQL-423 trigger: trg_provider_verification_decisions__inmutable
+model ProviderVerificationDecision {
+  id                String             @id(map: "pk_provider_verification_decisions") @default(uuid(7)) @db.Uuid
+  providerId        String             @map("provider_id") @db.Uuid
+  submissionId      String?            @map("submission_id") @db.Uuid
+  fromStatus        VerificationStatus @map("from_status")
+  toStatus          VerificationStatus @map("to_status")
+  verificationLevel Int?               @map("verification_level") @db.SmallInt
+  reason            String?            @db.VarChar(1000)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  decidedByUserId   String             @map("decided_by_user_id") @db.Uuid
+  decidedAt         DateTime           @map("decided_at") @db.Timestamptz(6)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  provider                      Provider                        @relation("fk_provider_verification_decisions__providers", fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_provider_verification_decisions__providers")
+  submission                    ProviderVerificationSubmission? @relation("fk_provider_verification_decisions__verif_submissions", fields: [submissionId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_provider_verification_decisions__verif_submissions")
+  providerVerificationEvidences ProviderVerificationEvidence[]  @relation("fk_provider_verification_evidence__verif_decisions")
+
+  @@index([providerId, decidedAt(sort: Desc)], map: "ix_provider_verification_decisions__provider_id_decided_at")
+  @@index([submissionId], map: "ix_provider_verification_decisions__submission_id")
+  @@map("provider_verification_decisions")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: SRS-ADM-001; OpenAPI updateProviderVerification.evidenceReviewed
+/// Resultado y vencimiento de cada evidencia revisada.
+// SQL-424 trigger: trg_provider_verification_evidence__inmutable
+model ProviderVerificationEvidence {
+  id           String         @id(map: "pk_provider_verification_evidence") @default(uuid(7)) @db.Uuid
+  decisionId   String         @map("decision_id") @db.Uuid
+  providerId   String         @map("provider_id") @db.Uuid
+  evidenceType String         @map("evidence_type") @db.VarChar(60)
+  result       EvidenceResult
+  expiresAt    DateTime?      @map("expires_at") @db.Date
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  decision ProviderVerificationDecision @relation("fk_provider_verification_evidence__verif_decisions", fields: [decisionId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_provider_verification_evidence__verif_decisions")
+  provider Provider                     @relation("fk_provider_verification_evidence__providers", fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_provider_verification_evidence__providers")
+
+  @@index([decisionId], map: "ix_provider_verification_evidence__decision_id")
+  @@index([providerId], map: "ix_provider_verification_evidence__provider_id")
+  @@index([expiresAt], where: raw("expires_at IS NOT NULL"), map: "ix_provider_verification_evidence__expiry")
+  @@map("provider_verification_evidence")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: SRS-QUO-004; DEC-004
+/// Pesos del ranking, versionados.
+// SQL-091 CHECK: ck_ranking_configurations__pesos
+model RankingConfiguration {
+  id              String   @id(map: "pk_ranking_configurations") @default(uuid(7)) @db.Uuid
+  rankingVersion  Int      @map("ranking_version")
+  weights         Json
+  activeFrom      DateTime @map("active_from") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  createdByUserId String?  @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([rankingVersion], map: "uq_ranking_configurations__ranking_version")
+  @@index([activeFrom(sort: Desc)], map: "ix_ranking_configurations__active_from")
+  @@map("ranking_configurations")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: SAD §6.6; ADR-020; SRS-CAT-011..013; DEC-004
+/// Proyección de búsqueda: una fila por paquete publicable. Se reconstruye desde las tablas autoritativas y nunca autoriza escrituras.
+// SQL-092 CHECK: ck_provider_search__puntajes
+// SQL-094 CHECK: ck_provider_search__importes
+// SQL-096 CHECK: ck_provider_search__cobertura
+model ProviderSearch {
+  packageId          String          @id(map: "pk_provider_search") @map("package_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): Copia desnormalizada reconstruible
+  providerId         String          @map("provider_id") @db.Uuid
+  businessName       String          @map("business_name") @db.VarChar(200)
+  /// Referencia lógica a categories.id (ADR-DATA-03): Copia desnormalizada reconstruible
+  categoryId         String          @map("category_id") @db.Uuid
+  /// Referencia lógica a subtypes.id (ADR-DATA-03): Copia desnormalizada reconstruible
+  subtypeId          String          @map("subtype_id") @db.Uuid
+  cityKey            String          @map("city_key")
+  coverageKeys       String[]        @default([]) @map("coverage_keys")
+  latitude           Decimal?        @db.Decimal(9, 6)
+  longitude          Decimal?        @db.Decimal(9, 6)
+  modality           BookingModality
+  priceFrom          Decimal         @map("price_from") @db.Decimal(14, 2)
+  pricePerPerson     Decimal?        @map("price_per_person") @db.Decimal(14, 2)
+  currency           String          @default("COP") @db.Char(3)
+  maxGuestCapacity   Int?            @map("max_guest_capacity")
+  primaryPhotoUrl    String?         @map("primary_photo_url")
+  verificationLevel  Int             @map("verification_level") @db.SmallInt
+  ratingAverage      Decimal?        @map("rating_average") @db.Decimal(3, 2)
+  reviewCount        Int             @default(0) @map("review_count")
+  qualityScore       Decimal         @map("quality_score") @db.Decimal(5, 4)
+  pricePositionScore Decimal         @map("price_position_score") @db.Decimal(5, 4)
+  completenessScore  Decimal         @map("completeness_score") @db.Decimal(5, 4)
+  valueScore         Decimal         @map("value_score") @db.Decimal(5, 4)
+  rankingVersion     Int             @map("ranking_version")
+  searchText         String          @map("search_text")
+  publishedAt        DateTime        @map("published_at") @db.Timestamptz(6)
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  package ServicePackage @relation("fk_provider_search__service_packages", fields: [packageId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_provider_search__service_packages")
+
+  @@index([categoryId, subtypeId, modality, priceFrom], map: "ix_provider_search__category_id_subtype_id_modality_price_from")
+  @@index([categoryId, valueScore(sort: Desc), qualityScore(sort: Desc), priceFrom, publishedAt, packageId], map: "ix_provider_search__value")
+  @@index([priceFrom, packageId], map: "ix_provider_search__price_from_package_id")
+  @@index([ratingAverage(sort: Desc), packageId], map: "ix_provider_search__rating_average_package_id")
+  @@index([publishedAt(sort: Desc), packageId], map: "ix_provider_search__published_at_package_id")
+  @@index([cityKey], map: "ix_provider_search__city_key")
+  @@index([coverageKeys], type: Gin, map: "gin_provider_search__coverage_keys")
+  @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin, map: "gin_provider_search__search_text")
+  @@index([providerId], map: "ix_provider_search__provider_id")
+  @@map("provider_search")
+}
+
+/// TDD §4.2.4 y §4.3.4. Fuente: DDD §12; ADR-020; SRS-REV-003
+/// Reputación agregada por proveedor a partir de reseñas visibles.
+// SQL-093 CHECK: ck_provider_reputation__conteos
+model ProviderReputation {
+  providerId        String    @id(map: "pk_provider_reputation") @map("provider_id") @db.Uuid
+  reviewCount       Int       @default(0) @map("review_count")
+  punctualitySum    Int       @default(0) @map("punctuality_sum")
+  serviceQualitySum Int       @default(0) @map("service_quality_sum")
+  communicationSum  Int       @default(0) @map("communication_sum")
+  valueForMoneySum  Int       @default(0) @map("value_for_money_sum")
+  ratingAverage     Decimal?  @map("rating_average") @db.Decimal(3, 2)
+  lastReviewAt      DateTime? @map("last_review_at") @db.Timestamptz(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  provider Provider @relation("fk_provider_reputation__providers", fields: [providerId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_provider_reputation__providers")
+
+  @@map("provider_reputation")
+}
+
+// ===== Módulo 05: event-management (TDD §4.2.5) =====
+
+/// TDD §4.2.5 y §4.3.5. Fuente: DDD §5.5; SRS-EVT-001; DEC-007
+/// Evento de una empresa, raíz del flujo de cotización.
+// SQL-130 CHECK: ck_events__intervalo
+// SQL-131 CHECK: ck_events__invitados
+// SQL-132 CHECK: ck_events__presupuesto
+// SQL-133 CHECK: ck_events__coordenadas
+// SQL-519 RLS (migración 20, TDD §5.2)
+model Event {
+  id                      String      @id(map: "pk_events") @default(uuid(7)) @db.Uuid
+  organizationId          String      @map("organization_id") @db.Uuid
+  coordinatorMembershipId String?     @map("coordinator_membership_id") @db.Uuid
+  templateId              String?     @map("template_id") @db.Uuid
+  name                    String      @db.VarChar(160)
+  localStartsAt           DateTime    @map("local_starts_at") @db.Timestamp(0)
+  localEndsAt             DateTime    @map("local_ends_at") @db.Timestamp(0)
+  timeZone                String      @map("time_zone") @db.VarChar(64)
+  startsAtUtc             DateTime    @map("starts_at_utc") @db.Timestamptz(6)
+  endsAtUtc               DateTime    @map("ends_at_utc") @db.Timestamptz(6)
+  eventDate               DateTime    @map("event_date") @db.Date
+  guests                  Int
+  locationAddress         String?     @map("location_address") @db.VarChar(300)
+  locationCity            String      @map("location_city") @db.VarChar(120)
+  latitude                Decimal?    @db.Decimal(9, 6)
+  longitude               Decimal?    @db.Decimal(9, 6)
+  estimatedBudget         Decimal?    @map("estimated_budget") @db.Decimal(14, 2)
+  currency                String      @default("COP") @db.Char(3)
+  notes                   String?     @db.VarChar(5000)
+  status                  EventStatus @default(BORRADOR)
+  archivedAt              DateTime?   @map("archived_at") @db.Timestamptz(6)
+  archiveWarningSentAt    DateTime?   @map("archive_warning_sent_at") @db.Timestamptz(6)
+  lastActivityAt          DateTime    @default(now()) @map("last_activity_at") @db.Timestamptz(6)
+  cancelledAt             DateTime?   @map("cancelled_at") @db.Timestamptz(6)
+  cancellationReason      String?     @map("cancellation_reason") @db.VarChar(1000)
+  clonedFromEventId       String?     @map("cloned_from_event_id") @db.Uuid
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  createdByUserId         String      @map("created_by_user_id") @db.Uuid
+  version                 Int         @default(1)
+  createdAt               DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization          Organization      @relation("fk_events__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_events__organizations")
+  coordinatorMembership Membership?       @relation("fk_events__memberships", fields: [organizationId, coordinatorMembershipId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_events__memberships")
+  template              EventTemplate?    @relation("fk_events__event_templates", fields: [templateId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_events__event_templates")
+  clonedFromEvent       Event?            @relation("fk_events__events", fields: [organizationId, clonedFromEventId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_events__events")
+  events                Event[]           @relation("fk_events__events")
+  eventCategories       EventCategory[]   @relation("fk_event_categories__events")
+  eventAssignments      EventAssignment[] @relation("fk_event_assignments__events")
+  quotations            Quotation[]       @relation("fk_quotations__events")
+
+  @@unique([organizationId, id], map: "uq_events__organization_id_id")
+  @@index([organizationId, eventDate, status], map: "ix_events__organization_id_event_date_status")
+  @@index([organizationId, coordinatorMembershipId, eventDate], map: "ix_events__organization_id_coordinator_membership_id_event_date")
+  @@index([startsAtUtc], where: raw("status = ANY (ARRAY['COTIZADO'::event_status, 'ENVIADO'::event_status])"), map: "ix_events__start_job")
+  @@index([lastActivityAt], where: raw("status = 'BORRADOR' AND archived_at IS NULL"), map: "ix_events__inactive_drafts")
+  @@map("events")
+}
+
+/// TDD §4.2.5 y §4.3.5. Fuente: SRS-EVT-003; SRS-EVT-005; DDD §4.5
+/// Servicios requeridos del evento, copiados de la plantilla o de un clon y editables antes de cotizar; se reemplazan en bloque.
+// SQL-520 RLS (migración 20, TDD §5.2)
+model EventCategory {
+  id                  String   @id(map: "pk_event_categories") @default(uuid(7)) @db.Uuid
+  organizationId      String   @map("organization_id") @db.Uuid
+  eventId             String   @map("event_id") @db.Uuid
+  categoryId          String   @map("category_id") @db.Uuid
+  subtypeId           String?  @map("subtype_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): `event-management` no depende de `provider-catalog`
+  suggestedProviderId String?  @map("suggested_provider_id") @db.Uuid
+  /// Referencia lógica a service_packages.id (ADR-DATA-03): `event-management` no depende de `provider-catalog`
+  suggestedPackageId  String?  @map("suggested_package_id") @db.Uuid
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  event    Event    @relation("fk_event_categories__events", fields: [organizationId, eventId], references: [organizationId, id], onDelete: Cascade, onUpdate: Restrict, map: "fk_event_categories__events")
+  category Category @relation("fk_event_categories__categories", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_event_categories__categories")
+  subtype  Subtype? @relation("fk_event_categories__subtypes", fields: [categoryId, subtypeId], references: [categoryId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_event_categories__subtypes")
+
+  @@unique([eventId, categoryId], where: raw("subtype_id IS NULL"), map: "uq_event_categories__category")
+  @@unique([eventId, categoryId, subtypeId], where: raw("subtype_id IS NOT NULL"), map: "uq_event_categories__subtype")
+  @@index([organizationId, eventId], map: "ix_event_categories__organization_id_event_id")
+  @@map("event_categories")
+}
+
+/// TDD §4.2.5 y §4.3.5. Fuente: SRS-AUTH-011; SAD §4.1
+/// Eventos que puede operar un coordinador restringido (H-06).
+// SQL-521 RLS (migración 20, TDD §5.2)
+model EventAssignment {
+  id               String    @id(map: "pk_event_assignments") @default(uuid(7)) @db.Uuid
+  organizationId   String    @map("organization_id") @db.Uuid
+  eventId          String    @map("event_id") @db.Uuid
+  membershipId     String    @map("membership_id") @db.Uuid
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  assignedByUserId String    @map("assigned_by_user_id") @db.Uuid
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokedByUserId  String?   @map("revoked_by_user_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  event      Event      @relation("fk_event_assignments__events", fields: [organizationId, eventId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_event_assignments__events")
+  membership Membership @relation("fk_event_assignments__memberships", fields: [organizationId, membershipId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_event_assignments__memberships")
+
+  @@unique([eventId, membershipId], where: raw("revoked_at IS NULL"), map: "uq_event_assignments__active")
+  @@index([organizationId, membershipId], map: "ix_event_assignments__organization_id_membership_id")
+  @@index([organizationId, eventId], map: "ix_event_assignments__organization_id_event_id")
+  @@map("event_assignments")
+}
+
+// ===== Módulo 06: availability-booking (TDD §4.2.6) =====
+
+/// TDD §4.2.6 y §4.3.6. Fuente: DDD §5.7; TEC-011
+/// Raíz de la disponibilidad de un proveedor; sostiene el ETag de `setProviderAvailability`. Se crea la primera vez que se escribe.
+model ProviderAvailability {
+  providerId String   @id(map: "pk_provider_availability") @map("provider_id") @db.Uuid
+  version    Int      @default(1)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  provider Provider @relation("fk_provider_availability__providers", fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_provider_availability__providers")
+
+  @@map("provider_availability")
+}
+
+/// TDD §4.2.6 y §4.3.6. Fuente: ADR-016; DEC-006
+/// Cupo global del proveedor por fecha local. Autoridad contra la sobreventa.
+// SQL-150 CHECK: ck_provider_daily_capacity__cupo
+model ProviderDailyCapacity {
+  providerId String   @map("provider_id") @db.Uuid
+  localDate  DateTime @map("local_date") @db.Date
+  capacity   Int      @default(2)
+  consumed   Int      @default(0)
+  blocked    Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  provider Provider @relation("fk_provider_daily_capacity__providers", fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_provider_daily_capacity__providers")
+
+  @@id([providerId, localDate], map: "pk_provider_daily_capacity")
+  @@map("provider_daily_capacity")
+}
+
+/// TDD §4.2.6 y §4.3.6. Fuente: ADR-016; DEC-006
+/// Cupo propio de un paquete por fecha.
+// SQL-151 CHECK: ck_package_daily_capacity__cupo
+model PackageDailyCapacity {
+  packageId            String   @map("package_id") @db.Uuid
+  localDate            DateTime @map("local_date") @db.Date
+  providerId           String   @map("provider_id") @db.Uuid
+  capacity             Int
+  consumed             Int      @default(0)
+  independentInventory Boolean  @default(false) @map("independent_inventory")
+  blocked              Boolean  @default(false)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  package ServicePackage @relation("fk_package_daily_capacity__service_packages", fields: [providerId, packageId], references: [providerId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_package_daily_capacity__service_packages")
+
+  @@id([packageId, localDate], map: "pk_package_daily_capacity")
+  @@index([providerId, localDate], map: "ix_package_daily_capacity__provider_id_local_date")
+  @@index([providerId, packageId], map: "ix_package_daily_capacity__provider_id_package_id")
+  @@map("package_daily_capacity")
+}
+
+/// TDD §4.2.6 y §4.3.6. Fuente: DDD §5.7; SRS-BOOK-009; TEC-009
+/// Contratación confirmada, por adjudicación o por Instant Book.
+// SQL-152 CHECK: ck_bookings__cantidad
+// SQL-153 CHECK: ck_bookings__intervalo
+// SQL-154 CHECK: ck_bookings__precio
+// SQL-155 CHECK: ck_bookings__revision
+// SQL-156 CHECK: ck_bookings__decision
+// SQL-157 CHECK: ck_bookings__paquete
+// SQL-158 CHECK: ck_bookings__consumo
+// SQL-522 RLS (migración 20, TDD §5.2)
+model Booking {
+  id                        String                    @id(map: "pk_bookings") @default(uuid(7)) @db.Uuid
+  organizationId            String                    @map("organization_id") @db.Uuid
+  /// Referencia lógica a events.id (ADR-DATA-03): `availability-booking` no depende de `event-management` (SAD §4.4)
+  eventId                   String                    @map("event_id") @db.Uuid
+  /// Referencia lógica a quotation_items.id (ADR-DATA-03): No depende de `quotation`
+  quotationItemId           String                    @map("quotation_item_id") @db.Uuid
+  providerId                String                    @map("provider_id") @db.Uuid
+  packageId                 String?                   @map("package_id") @db.Uuid
+  origin                    BookingOrigin
+  status                    BookingStatus             @default(CONFIRMADO)
+  quantity                  Int                       @default(1)
+  serviceStartsAt           DateTime                  @map("service_starts_at") @db.Timestamptz(6)
+  serviceEndsAt             DateTime                  @map("service_ends_at") @db.Timestamptz(6)
+  timeZone                  String                    @map("time_zone") @db.VarChar(64)
+  firstServiceDate          DateTime                  @map("first_service_date") @db.Date
+  acceptedPrice             Decimal                   @map("accepted_price") @db.Decimal(14, 2)
+  currency                  String                    @default("COP") @db.Char(3)
+  consumesGlobalCapacity    Boolean                   @map("consumes_global_capacity")
+  consumesPackageCapacity   Boolean                   @map("consumes_package_capacity")
+  confirmedAt               DateTime                  @map("confirmed_at") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  confirmedByUserId         String                    @map("confirmed_by_user_id") @db.Uuid
+  reviewOrigin              ReviewOrigin?             @map("review_origin")
+  organizerReviewDecision   SuspensionReviewDecision? @map("organizer_review_decision")
+  organizerReviewDecidedAt  DateTime?                 @map("organizer_review_decided_at") @db.Timestamptz(6)
+  reviewDecisionDueAt       DateTime?                 @map("review_decision_due_at") @db.Timestamptz(6)
+  reviewWindowClosedAt      DateTime?                 @map("review_window_closed_at") @db.Timestamptz(6)
+  cancellationRequestedBy   BookingParty?             @map("cancellation_requested_by")
+  cancellationRequestedAt   DateTime?                 @map("cancellation_requested_at") @db.Timestamptz(6)
+  cancellationResponseDueAt DateTime?                 @map("cancellation_response_due_at") @db.Timestamptz(6)
+  cancellationReason        String?                   @map("cancellation_reason") @db.VarChar(1000)
+  serviceMarkedDoneAt       DateTime?                 @map("service_marked_done_at") @db.Timestamptz(6)
+  completionDueAt           DateTime?                 @map("completion_due_at") @db.Timestamptz(6)
+  closureReminderSentAt     DateTime?                 @map("closure_reminder_sent_at") @db.Timestamptz(6)
+  completedAt               DateTime?                 @map("completed_at") @db.Timestamptz(6)
+  cancelledAt               DateTime?                 @map("cancelled_at") @db.Timestamptz(6)
+  createdAt                 DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime                  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization           Organization            @relation("fk_bookings__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_bookings__organizations")
+  provider               Provider                @relation("fk_bookings__providers", fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_bookings__providers")
+  package                ServicePackage?         @relation("fk_bookings__service_packages", fields: [providerId, packageId], references: [providerId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_bookings__service_packages")
+  bookingConsumedDates   BookingConsumedDate[]   @relation("fk_booking_consumed_dates__bookings")
+  bookingTermsSnapshot   BookingTermsSnapshot?   @relation("fk_booking_terms_snapshots__bookings")
+  bookingStatusHistories BookingStatusHistory[]  @relation("fk_booking_status_history__bookings")
+  bookingChangeProposals BookingChangeProposal[] @relation("fk_booking_change_proposals__bookings")
+  commissionRecord       CommissionRecord?       @relation("fk_commission_records__bookings")
+  award                  Award?                  @relation("fk_awards__bookings")
+  review                 Review?                 @relation("fk_reviews__bookings")
+  disputeResolutions     DisputeResolution[]     @relation("fk_dispute_resolutions__bookings")
+
+  @@unique([organizationId, id], map: "uq_bookings__organization_id_id")
+  @@unique([quotationItemId], where: raw("status <> ALL (ARRAY['CANCELADO'::booking_status, 'NO_PRESTADO'::booking_status])"), map: "uq_bookings__active_item")
+  @@index([organizationId, createdAt(sort: Desc)], map: "ix_bookings__organization_id_created_at")
+  @@index([organizationId, eventId, status], map: "ix_bookings__organization_id_event_id_status")
+  @@index([organizationId, quotationItemId], map: "ix_bookings__organization_id_quotation_item_id")
+  @@index([providerId, status, firstServiceDate], map: "ix_bookings__provider_id_status_first_service_date")
+  @@index([providerId, packageId], map: "ix_bookings__provider_id_package_id")
+  @@index([serviceStartsAt], where: raw("status = 'CONFIRMADO'"), map: "ix_bookings__start_job")
+  @@index([cancellationResponseDueAt], where: raw("status = 'CANCELACION_SOLICITADA'"), map: "ix_bookings__cancel_timeout")
+  @@index([completionDueAt], where: raw("status = 'SERVICIO_REALIZADO'"), map: "ix_bookings__auto_close")
+  @@index([reviewDecisionDueAt], where: raw("status = 'CANCELACION_EN_REVISION' AND review_window_closed_at IS NULL"), map: "ix_bookings__review_window")
+  @@index([status, createdAt], where: raw("status = ANY (ARRAY['CANCELACION_EN_REVISION'::booking_status, 'INCIDENCIA'::booking_status])"), map: "ix_bookings__disputes")
+  @@map("bookings")
+}
+
+/// TDD §4.2.6 y §4.3.6. Fuente: SRS-EVT-010; DEC-025; ADR-016
+/// Fechas locales que consume cada contratación; permite liberar y reconciliar los contadores.
+// SQL-159 CHECK: ck_booking_consumed_dates__cantidad
+// SQL-523 RLS (migración 20, TDD §5.2)
+model BookingConsumedDate {
+  bookingId      String    @map("booking_id") @db.Uuid
+  localDate      DateTime  @map("local_date") @db.Date
+  organizationId String    @map("organization_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): Copia de la contratación
+  providerId     String    @map("provider_id") @db.Uuid
+  /// Referencia lógica a service_packages.id (ADR-DATA-03): Copia de la contratación
+  packageId      String?   @map("package_id") @db.Uuid
+  quantity       Int
+  releasedAt     DateTime? @map("released_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  booking Booking @relation("fk_booking_consumed_dates__bookings", fields: [organizationId, bookingId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_booking_consumed_dates__bookings")
+
+  @@id([bookingId, localDate], map: "pk_booking_consumed_dates")
+  @@index([organizationId, bookingId], map: "ix_booking_consumed_dates__organization_id_booking_id")
+  @@index([providerId, localDate], where: raw("released_at IS NULL"), map: "ix_booking_consumed_dates__provider")
+  @@index([packageId, localDate], where: raw("released_at IS NULL AND package_id IS NOT NULL"), map: "ix_booking_consumed_dates__package")
+  @@map("booking_consumed_dates")
+}
+
+/// TDD §4.2.6 y §4.3.6. Fuente: ADR-019; DEC-018; SRS-BOOK-004
+/// Términos aceptados, congelados al confirmar (§5.3).
+// SQL-160 CHECK: ck_booking_terms_snapshots__formato
+// SQL-425 trigger: trg_booking_terms_snapshots__inmutable
+// SQL-524 RLS (migración 20, TDD §5.2)
+model BookingTermsSnapshot {
+  bookingId      String   @id(map: "pk_booking_terms_snapshots") @map("booking_id") @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): Copia de la contratación
+  providerId     String   @map("provider_id") @db.Uuid
+  schemaVersion  Int      @map("schema_version") @db.SmallInt
+  terms          Json
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  booking Booking @relation("fk_booking_terms_snapshots__bookings", fields: [organizationId, bookingId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_booking_terms_snapshots__bookings")
+
+  @@unique([organizationId, bookingId], map: "uq_booking_terms_snapshots__organization_id_booking_id")
+  @@map("booking_terms_snapshots")
+}
+
+/// TDD §4.2.6 y §4.3.6. Fuente: SRS-BOOK-009; SRS-BOOK-007
+/// Cada transición de la contratación, con actor y motivo.
+// SQL-426 trigger: trg_booking_status_history__inmutable
+// SQL-525 RLS (migración 20, TDD §5.2)
+model BookingStatusHistory {
+  id             String         @id(map: "pk_booking_status_history") @default(uuid(7)) @db.Uuid
+  organizationId String         @map("organization_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): Copia de la contratación
+  providerId     String         @map("provider_id") @db.Uuid
+  bookingId      String         @map("booking_id") @db.Uuid
+  fromStatus     BookingStatus? @map("from_status")
+  toStatus       BookingStatus  @map("to_status")
+  actorParty     BookingParty   @map("actor_party")
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  actorUserId    String?        @map("actor_user_id") @db.Uuid
+  reason         String?        @db.VarChar(2000)
+  evidenceUrl    String?        @map("evidence_url")
+  occurredAt     DateTime       @map("occurred_at") @db.Timestamptz(6)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  booking Booking @relation("fk_booking_status_history__bookings", fields: [organizationId, bookingId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_booking_status_history__bookings")
+
+  @@index([organizationId, bookingId, occurredAt], map: "ix_booking_status_history__org_booking_id_occurred_at")
+  @@map("booking_status_history")
+}
+
+/// TDD §4.2.6 y §4.3.6. Fuente: SRS-BOOK-005; SRS-EVT-008
+/// Modificación de alcance o precio propuesta, que la contraparte debe aceptar (H-19; sin operación de API, Q-03).
+// SQL-167 CHECK: ck_booking_change_proposals__importes
+// SQL-526 RLS (migración 20, TDD §5.2)
+model BookingChangeProposal {
+  id                String               @id(map: "pk_booking_change_proposals") @default(uuid(7)) @db.Uuid
+  organizationId    String               @map("organization_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): Copia de la contratación
+  providerId        String               @map("provider_id") @db.Uuid
+  bookingId         String               @map("booking_id") @db.Uuid
+  proposedBy        BookingParty         @map("proposed_by")
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  proposedByUserId  String               @map("proposed_by_user_id") @db.Uuid
+  description       String
+  proposedPrice     Decimal?             @map("proposed_price") @db.Decimal(14, 2)
+  currency          String               @default("COP") @db.Char(3)
+  status            ChangeProposalStatus @default(PENDIENTE)
+  respondedAt       DateTime?            @map("responded_at") @db.Timestamptz(6)
+  respondedByUserId String?              @map("responded_by_user_id") @db.Uuid
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  booking Booking @relation("fk_booking_change_proposals__bookings", fields: [organizationId, bookingId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_booking_change_proposals__bookings")
+
+  @@unique([bookingId], where: raw("status = 'PENDIENTE'"), map: "uq_booking_change_proposals__pending")
+  @@index([organizationId, bookingId], map: "ix_booking_change_proposals__organization_id_booking_id")
+  @@map("booking_change_proposals")
+}
+
+/// TDD §4.2.6 y §4.3.6. Fuente: SAD §6.4; DEC-010; DEC-027
+/// Porcentaje de comisión versionado, con periodos que no se solapan.
+// SQL-161 CHECK: ck_commission_rates__porcentaje
+// SQL-162 CHECK: ck_commission_rates__periodo
+// SQL-163 exclusión: ex_commission_rates__sin_solape
+model CommissionRate {
+  id              String    @id(map: "pk_commission_rates") @default(uuid(7)) @db.Uuid
+  rate            Decimal   @db.Decimal(5, 4)
+  validFrom       DateTime  @map("valid_from") @db.Timestamptz(6)
+  validUntil      DateTime? @map("valid_until") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  createdByUserId String?   @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("commission_rates")
+}
+
+/// TDD §4.2.6 y §4.3.6. Fuente: TEC-010; SRS-BOOK-010; DEC-033
+/// Registro de comisión de una contratación; no implica cobro.
+// SQL-164 CHECK: ck_commission_records__importes
+// SQL-165 CHECK: ck_commission_records__devengo
+// SQL-166 CHECK: ck_commission_records__reversion
+// SQL-427 trigger: trg_commission_records__sin_borrado
+// SQL-527 RLS (migración 20, TDD §5.2)
+model CommissionRecord {
+  id               String           @id(map: "pk_commission_records") @default(uuid(7)) @db.Uuid
+  organizationId   String           @map("organization_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): Copia de la contratación
+  providerId       String           @map("provider_id") @db.Uuid
+  bookingId        String           @map("booking_id") @db.Uuid
+  status           CommissionStatus @default(PENDIENTE)
+  rate             Decimal          @db.Decimal(5, 4)
+  baseAmount       Decimal          @map("base_amount") @db.Decimal(14, 2)
+  amount           Decimal          @db.Decimal(14, 2)
+  currency         String           @default("COP") @db.Char(3)
+  accruedAt        DateTime?        @map("accrued_at") @db.Timestamptz(6)
+  closedAt         DateTime?        @map("closed_at") @db.Timestamptz(6)
+  reversedAt       DateTime?        @map("reversed_at") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  reversedByUserId String?          @map("reversed_by_user_id") @db.Uuid
+  reversalReason   String?          @map("reversal_reason") @db.VarChar(1000)
+  invoiceReference String?          @map("invoice_reference") @db.VarChar(100)
+  paymentReference String?          @map("payment_reference") @db.VarChar(100)
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  booking Booking @relation("fk_commission_records__bookings", fields: [organizationId, bookingId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_commission_records__bookings")
+
+  @@unique([organizationId, bookingId], map: "uq_commission_records__organization_id_booking_id")
+  @@index([accruedAt], where: raw("status = 'DEVENGADA'"), map: "ix_commission_records__accrued")
+  @@index([reversedAt], where: raw("status = 'REVERTIDA'"), map: "ix_commission_records__reversed")
+  @@map("commission_records")
+}
+
+// ===== Módulo 07: rfq-offers (TDD §4.2.7) =====
+
+/// TDD §4.2.7 y §4.3.7. Fuente: SAD §7.2; SAD §4.4; H-08
+/// Fila propia de `rfq-offers` por ítem cotizado: punto de bloqueo de la adjudicación y de las rondas (ADR-DATA-04).
+// SQL-528 RLS (migración 20, TDD §5.2)
+model RfqItem {
+  /// Referencia lógica a quotation_items.id (ADR-DATA-03): `rfq-offers` no depende de `quotation`
+  quotationItemId String   @id(map: "pk_rfq_items") @map("quotation_item_id") @db.Uuid
+  organizationId  String   @map("organization_id") @db.Uuid
+  /// Referencia lógica a events.id (ADR-DATA-03): No depende de `event-management`
+  eventId         String   @map("event_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation("fk_rfq_items__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_rfq_items__organizations")
+  rfqCycles    RfqCycle[]   @relation("fk_rfq_cycles__rfq_items")
+
+  @@unique([organizationId, quotationItemId], map: "uq_rfq_items__organization_id_quotation_item_id")
+  @@index([organizationId, eventId], map: "ix_rfq_items__organization_id_event_id")
+  @@map("rfq_items")
+}
+
+/// TDD §4.2.7 y §4.3.7. Fuente: TEC-002; DDD §4.9; SRS-RFQ-010
+/// Ronda de solicitudes paralelas de un ítem, con SLA común.
+// SQL-210 CHECK: ck_rfq_cycles__sla
+// SQL-211 CHECK: ck_rfq_cycles__ronda
+// SQL-529 RLS (migración 20, TDD §5.2)
+model RfqCycle {
+  id              String         @id(map: "pk_rfq_cycles") @default(uuid(7)) @db.Uuid
+  organizationId  String         @map("organization_id") @db.Uuid
+  quotationItemId String         @map("quotation_item_id") @db.Uuid
+  /// Referencia lógica a events.id (ADR-DATA-03): Copia del ítem
+  eventId         String         @map("event_id") @db.Uuid
+  round           Int            @db.SmallInt
+  slaHours        Int            @map("sla_hours") @db.SmallInt
+  channel         ContactChannel
+  scope           String         @db.VarChar(6000)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  createdByUserId String         @map("created_by_user_id") @db.Uuid
+  closedAt        DateTime?      @map("closed_at") @db.Timestamptz(6)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  quotationItem RfqItem      @relation("fk_rfq_cycles__rfq_items", fields: [organizationId, quotationItemId], references: [organizationId, quotationItemId], onDelete: Restrict, onUpdate: Restrict, map: "fk_rfq_cycles__rfq_items")
+  rfqRequests   RfqRequest[] @relation("fk_rfq_requests__rfq_cycles")
+  award         Award?       @relation("fk_awards__rfq_cycles")
+
+  @@unique([quotationItemId, round], map: "uq_rfq_cycles__quotation_item_id_round")
+  @@unique([organizationId, id], map: "uq_rfq_cycles__organization_id_id")
+  @@index([organizationId, quotationItemId], map: "ix_rfq_cycles__organization_id_quotation_item_id")
+  @@map("rfq_cycles")
+}
+
+/// TDD §4.2.7 y §4.3.7. Fuente: DDD §5.8; SRS-RFQ-002..005; SRS-RFQ-013
+/// Solicitud individual a un proveedor, con su SLA y estado de envío.
+// SQL-212 CHECK: ck_rfq_requests__cupo
+// SQL-213 CHECK: ck_rfq_requests__reintentos
+// SQL-214 CHECK: ck_rfq_requests__snapshot
+// SQL-428 trigger: trg_rfq_requests__snapshot_inmutable
+// SQL-530 RLS (migración 20, TDD §5.2)
+model RfqRequest {
+  id                    String         @id(map: "pk_rfq_requests") @default(uuid(7)) @db.Uuid
+  organizationId        String         @map("organization_id") @db.Uuid
+  cycleId               String         @map("cycle_id") @db.Uuid
+  /// Referencia lógica a quotation_items.id (ADR-DATA-03): Copia de la ronda
+  quotationItemId       String         @map("quotation_item_id") @db.Uuid
+  /// Referencia lógica a events.id (ADR-DATA-03): Copia de la ronda
+  eventId               String         @map("event_id") @db.Uuid
+  providerId            String         @map("provider_id") @db.Uuid
+  slot                  Int            @db.SmallInt
+  status                RfqStatus      @default(PENDIENTE_ENVIO)
+  channel               ContactChannel
+  dispatchStatus        DispatchStatus @default(PENDIENTE) @map("dispatch_status")
+  snapshotSchemaVersion Int            @map("snapshot_schema_version") @db.SmallInt
+  requestSnapshot       Json           @map("request_snapshot")
+  slaExpiresAt          DateTime       @map("sla_expires_at") @db.Timestamptz(6)
+  sentAt                DateTime?      @map("sent_at") @db.Timestamptz(6)
+  slaReminderSentAt     DateTime?      @map("sla_reminder_sent_at") @db.Timestamptz(6)
+  respondedAt           DateTime?      @map("responded_at") @db.Timestamptz(6)
+  rejectedAt            DateTime?      @map("rejected_at") @db.Timestamptz(6)
+  rejectionReason       String?        @map("rejection_reason") @db.VarChar(1000)
+  expiredAt             DateTime?      @map("expired_at") @db.Timestamptz(6)
+  cancelledAt           DateTime?      @map("cancelled_at") @db.Timestamptz(6)
+  cancelReason          String?        @map("cancel_reason") @db.VarChar(1000)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  cancelledByUserId     String?        @map("cancelled_by_user_id") @db.Uuid
+  retryCount            Int            @default(0) @map("retry_count") @db.SmallInt
+  createdAt             DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cycle                  RfqCycle                @relation("fk_rfq_requests__rfq_cycles", fields: [organizationId, cycleId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_rfq_requests__rfq_cycles")
+  provider               Provider                @relation("fk_rfq_requests__providers", fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_rfq_requests__providers")
+  magicLinkGrants        MagicLinkGrant[]        @relation("fk_magic_link_grants__rfq_requests")
+  rfqOffers              RfqOffer[]              @relation("fk_rfq_offers__rfq_requests")
+  award                  Award?                  @relation("fk_awards__rfq_requests")
+  assistedResponseDrafts AssistedResponseDraft[] @relation("fk_assisted_response_drafts__rfq_requests")
+
+  @@unique([cycleId, slot], map: "uq_rfq_requests__cycle_id_slot")
+  @@unique([cycleId, providerId], map: "uq_rfq_requests__cycle_id_provider_id")
+  @@unique([organizationId, id], map: "uq_rfq_requests__organization_id_id")
+  @@index([organizationId, cycleId], map: "ix_rfq_requests__organization_id_cycle_id")
+  @@index([organizationId, eventId, status], map: "ix_rfq_requests__organization_id_event_id_status")
+  @@index([organizationId, quotationItemId, status], map: "ix_rfq_requests__organization_id_quotation_item_id_status")
+  @@index([organizationId, createdAt(sort: Desc)], map: "ix_rfq_requests__organization_id_created_at")
+  @@index([providerId, status, slaExpiresAt], map: "ix_rfq_requests__provider_id_status_sla_expires_at")
+  @@index([slaExpiresAt], where: raw("status = ANY (ARRAY['PENDIENTE_ENVIO'::rfq_status, 'ENVIADO'::rfq_status, 'RESPONDIDO'::rfq_status, 'ERROR_ENVIO'::rfq_status])"), map: "ix_rfq_requests__sla")
+  @@map("rfq_requests")
+}
+
+/// TDD §4.2.7 y §4.3.7. Fuente: SAD §7.3; TEC-008; SRS-MAGIC-001..004
+/// Credencial de capacidad limitada de una solicitud. Solo guarda el hash y el material de derivación.
+// SQL-215 CHECK: ck_magic_link_grants__token
+// SQL-531 RLS (migración 20, TDD §5.2)
+model MagicLinkGrant {
+  id               String          @id(map: "pk_magic_link_grants") @default(uuid(7)) @db.Uuid
+  organizationId   String          @map("organization_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): Copia de la solicitud
+  providerId       String          @map("provider_id") @db.Uuid
+  requestId        String          @map("request_id") @db.Uuid
+  tokenNonce       Bytes           @map("token_nonce")
+  tokenHash        Bytes           @map("token_hash")
+  secretKeyVersion Int             @map("secret_key_version") @db.SmallInt
+  status           MagicLinkStatus @default(ACTIVO)
+  expiresAt        DateTime        @map("expires_at") @db.Timestamptz(6)
+  firstOpenedAt    DateTime?       @map("first_opened_at") @db.Timestamptz(6)
+  consumedAt       DateTime?       @map("consumed_at") @db.Timestamptz(6)
+  revokedAt        DateTime?       @map("revoked_at") @db.Timestamptz(6)
+  revocationReason String?         @map("revocation_reason")
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  request RfqRequest @relation("fk_magic_link_grants__rfq_requests", fields: [organizationId, requestId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_magic_link_grants__rfq_requests")
+
+  @@unique([tokenHash], map: "uq_magic_link_grants__token_hash")
+  @@unique([requestId], where: raw("status = 'ACTIVO'"), map: "uq_magic_link_grants__active")
+  @@index([organizationId, requestId], map: "ix_magic_link_grants__organization_id_request_id")
+  @@index([expiresAt], where: raw("status = 'ACTIVO'"), map: "ix_magic_link_grants__expiry")
+  @@map("magic_link_grants")
+}
+
+/// TDD §4.2.7 y §4.3.7. Fuente: TEC-001; DEC-005; SRS-RFQ-006; SRS §9.7; H-10
+/// Respuesta de un proveedor: revisión inmutable de oferta o rechazo. Solo cambian `status` y `status_changed_at`.
+// SQL-216 CHECK: ck_rfq_offers__decision
+// SQL-217 CHECK: ck_rfq_offers__precio
+// SQL-218 CHECK: ck_rfq_offers__revision
+// SQL-219 CHECK: ck_rfq_offers__extras
+// SQL-429 trigger: trg_rfq_offers__inmutable
+// SQL-532 RLS (migración 20, TDD §5.2)
+model RfqOffer {
+  id                   String            @id(map: "pk_rfq_offers") @default(uuid(7)) @db.Uuid
+  organizationId       String            @map("organization_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): Copia de la solicitud
+  providerId           String            @map("provider_id") @db.Uuid
+  requestId            String            @map("request_id") @db.Uuid
+  revision             Int
+  decision             OfferDecision
+  status               OfferStatus?
+  availability         OfferAvailability
+  totalPrice           Decimal?          @map("total_price") @db.Decimal(14, 2)
+  currency             String            @default("COP") @db.Char(3)
+  extras               Json              @default("[]")
+  conditions           String?           @db.VarChar(4000)
+  notes                String?           @db.VarChar(3000)
+  validUntil           DateTime?         @map("valid_until") @db.Timestamptz(6)
+  origin               OfferOrigin
+  revisionReason       String?           @map("revision_reason") @db.VarChar(1000)
+  supersedesOfferId    String?           @map("supersedes_offer_id") @db.Uuid
+  replacementConfirmed Boolean           @default(false) @map("replacement_confirmed")
+  receivedAt           DateTime          @map("received_at") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  submittedByUserId    String?           @map("submitted_by_user_id") @db.Uuid
+  statusChangedAt      DateTime?         @map("status_changed_at") @db.Timestamptz(6)
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  request               RfqRequest             @relation("fk_rfq_offers__rfq_requests", fields: [organizationId, requestId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_rfq_offers__rfq_requests")
+  supersedesOffer       RfqOffer?              @relation("fk_rfq_offers__rfq_offers", fields: [supersedesOfferId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_rfq_offers__rfq_offers")
+  rfqOffers             RfqOffer[]             @relation("fk_rfq_offers__rfq_offers")
+  award                 Award?                 @relation("fk_awards__rfq_offers")
+  assistedResponseDraft AssistedResponseDraft? @relation("fk_assisted_response_drafts__rfq_offers")
+
+  @@unique([requestId, revision], map: "uq_rfq_offers__request_id_revision")
+  @@unique([requestId], where: raw("status = 'RECIBIDA'"), map: "uq_rfq_offers__current")
+  @@unique([organizationId, id], map: "uq_rfq_offers__organization_id_id")
+  @@index([organizationId, requestId], map: "ix_rfq_offers__organization_id_request_id")
+  @@index([validUntil], where: raw("status = 'RECIBIDA'"), map: "ix_rfq_offers__validity")
+  @@index([providerId, receivedAt(sort: Desc)], map: "ix_rfq_offers__provider_id_received_at")
+  @@index([supersedesOfferId], map: "ix_rfq_offers__supersedes_offer_id")
+  @@map("rfq_offers")
+}
+
+/// TDD §4.2.7 y §4.3.7. Fuente: DDD §5.9; SRS-RFQ-009; ADR-DATA-05
+/// Decisión de adjudicación: una por ronda, ligada a la contratación creada en la misma transacción.
+// SQL-430 trigger: trg_awards__inmutable
+// SQL-533 RLS (migración 20, TDD §5.2)
+model Award {
+  id              String   @id(map: "pk_awards") @default(uuid(7)) @db.Uuid
+  organizationId  String   @map("organization_id") @db.Uuid
+  /// Referencia lógica a quotation_items.id (ADR-DATA-03): Copia de la ronda
+  quotationItemId String   @map("quotation_item_id") @db.Uuid
+  cycleId         String   @map("cycle_id") @db.Uuid
+  requestId       String   @map("request_id") @db.Uuid
+  offerId         String   @map("offer_id") @db.Uuid
+  bookingId       String   @map("booking_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): Copia de la oferta
+  providerId      String   @map("provider_id") @db.Uuid
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  awardedByUserId String   @map("awarded_by_user_id") @db.Uuid
+  awardedAt       DateTime @map("awarded_at") @db.Timestamptz(6)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  cycle   RfqCycle   @relation("fk_awards__rfq_cycles", fields: [organizationId, cycleId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_awards__rfq_cycles")
+  request RfqRequest @relation("fk_awards__rfq_requests", fields: [organizationId, requestId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_awards__rfq_requests")
+  offer   RfqOffer   @relation("fk_awards__rfq_offers", fields: [organizationId, offerId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_awards__rfq_offers")
+  booking Booking    @relation("fk_awards__bookings", fields: [organizationId, bookingId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_awards__bookings")
+
+  @@unique([organizationId, cycleId], map: "uq_awards__organization_id_cycle_id")
+  @@unique([organizationId, requestId], map: "uq_awards__organization_id_request_id")
+  @@unique([organizationId, offerId], map: "uq_awards__organization_id_offer_id")
+  @@unique([organizationId, bookingId], map: "uq_awards__organization_id_booking_id")
+  @@index([organizationId, quotationItemId], map: "ix_awards__organization_id_quotation_item_id")
+  @@map("awards")
+}
+
+// ===== Módulo 08: quotation (TDD §4.2.8) =====
+
+/// TDD §4.2.8 y §4.3.8. Fuente: DDD §5.6; SRS-QUO-006..012; SRS §9.6
+/// Cotización integral de un evento.
+// SQL-250 CHECK: ck_quotations__importes
+// SQL-251 CHECK: ck_quotations__version_snapshot
+// SQL-534 RLS (migración 20, TDD §5.2)
+model Quotation {
+  id               String          @id(map: "pk_quotations") @default(uuid(7)) @db.Uuid
+  organizationId   String          @map("organization_id") @db.Uuid
+  eventId          String          @map("event_id") @db.Uuid
+  templateId       String?         @map("template_id") @db.Uuid
+  status           QuotationStatus @default(BORRADOR)
+  snapshotVersion  Int             @default(0) @map("snapshot_version")
+  subtotal         Decimal         @default("0") @db.Decimal(14, 2)
+  commissionRate   Decimal?        @map("commission_rate") @db.Decimal(5, 4)
+  commissionAmount Decimal?        @map("commission_amount") @db.Decimal(14, 2)
+  totalEstimated   Decimal         @default("0") @map("total_estimated") @db.Decimal(14, 2)
+  currency         String          @default("COP") @db.Char(3)
+  lastActivityAt   DateTime        @default(now()) @map("last_activity_at") @db.Timestamptz(6)
+  sentAt           DateTime?       @map("sent_at") @db.Timestamptz(6)
+  closedAt         DateTime?       @map("closed_at") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  createdByUserId  String          @map("created_by_user_id") @db.Uuid
+  version          Int             @default(1)
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  event              Event               @relation("fk_quotations__events", fields: [organizationId, eventId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotations__events")
+  template           EventTemplate?      @relation("fk_quotations__event_templates", fields: [templateId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotations__event_templates")
+  quotationItems     QuotationItem[]     @relation("fk_quotation_items__quotations")
+  quotationVersions  QuotationVersion[]  @relation("fk_quotation_versions__quotations")
+  quotationDocuments QuotationDocument[] @relation("fk_quotation_documents__quotations")
+
+  @@unique([organizationId, id], map: "uq_quotations__organization_id_id")
+  @@index([organizationId, eventId, createdAt], map: "ix_quotations__organization_id_event_id_created_at")
+  @@index([organizationId, status, createdAt], map: "ix_quotations__organization_id_status_created_at")
+  @@map("quotations")
+}
+
+/// TDD §4.2.8 y §4.3.8. Fuente: DDD §5.6; SRS-QUO-007; SRS-TRK-001; TEC-010
+/// Servicio requerido, su selección y su estado de seguimiento.
+// SQL-252 CHECK: ck_quotation_items__seleccion
+// SQL-253 CHECK: ck_quotation_items__importes
+// SQL-535 RLS (migración 20, TDD §5.2)
+model QuotationItem {
+  id                 String             @id(map: "pk_quotation_items") @default(uuid(7)) @db.Uuid
+  organizationId     String             @map("organization_id") @db.Uuid
+  quotationId        String             @map("quotation_id") @db.Uuid
+  position           Int                @db.SmallInt
+  categoryId         String             @map("category_id") @db.Uuid
+  subtypeId          String?            @map("subtype_id") @db.Uuid
+  selectedProviderId String?            @map("selected_provider_id") @db.Uuid
+  selectedPackageId  String?            @map("selected_package_id") @db.Uuid
+  modality           BookingModality?
+  priceKind          PriceKind          @default(ESTIMADO) @map("price_kind")
+  unitPrice          Decimal?           @map("unit_price") @db.Decimal(14, 2)
+  estimatedTotal     Decimal?           @map("estimated_total") @db.Decimal(14, 2)
+  currency           String             @default("COP") @db.Char(3)
+  trackingStatus     ItemTrackingStatus @default(COTIZADO) @map("tracking_status")
+  trackingChangedAt  DateTime           @default(now()) @map("tracking_changed_at") @db.Timestamptz(6)
+  removedAt          DateTime?          @map("removed_at") @db.Timestamptz(6)
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  quotation                      Quotation                      @relation("fk_quotation_items__quotations", fields: [organizationId, quotationId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_items__quotations")
+  category                       Category                       @relation("fk_quotation_items__categories", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_items__categories")
+  subtype                        Subtype?                       @relation("fk_quotation_items__subtypes", fields: [categoryId, subtypeId], references: [categoryId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_items__subtypes")
+  selectedSelectedPackage        ServicePackage?                @relation("fk_quotation_items__service_packages", fields: [selectedProviderId, selectedPackageId], references: [providerId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_items__service_packages")
+  quotationItemSubtypes          QuotationItemSubtype[]         @relation("fk_quotation_item_subtypes__quotation_items")
+  quotationItemOptions           QuotationItemOption[]          @relation("fk_quotation_item_options__quotation_items")
+  quotationItemTrackingHistories QuotationItemTrackingHistory[] @relation("fk_quotation_item_tracking_history__quotation_items")
+
+  @@unique([organizationId, id], map: "uq_quotation_items__organization_id_id")
+  @@index([organizationId, quotationId, position], map: "ix_quotation_items__organization_id_quotation_id_position")
+  @@index([organizationId, trackingStatus, trackingChangedAt], map: "ix_quotation_items__org_tracking_status_tracking_changed_at")
+  @@map("quotation_items")
+}
+
+/// TDD §4.2.8 y §4.3.8. Fuente: OpenAPI QuotationItemInput.subtypeIds; H-23
+/// Subtipos solicitados para generar candidatos de un ítem.
+// SQL-536 RLS (migración 20, TDD §5.2)
+model QuotationItemSubtype {
+  itemId         String   @map("item_id") @db.Uuid
+  subtypeId      String   @map("subtype_id") @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  categoryId     String   @map("category_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  item    QuotationItem @relation("fk_quotation_item_subtypes__quotation_items", fields: [organizationId, itemId], references: [organizationId, id], onDelete: Cascade, onUpdate: Restrict, map: "fk_quotation_item_subtypes__quotation_items")
+  subtype Subtype       @relation("fk_quotation_item_subtypes__subtypes", fields: [categoryId, subtypeId], references: [categoryId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_item_subtypes__subtypes")
+
+  @@id([itemId, subtypeId], map: "pk_quotation_item_subtypes")
+  @@index([organizationId, itemId], map: "ix_quotation_item_subtypes__organization_id_item_id")
+  @@map("quotation_item_subtypes")
+}
+
+/// TDD §4.2.8 y §4.3.8. Fuente: SRS-QUO-004; SRS-QUO-006; OpenAPI QuotationOption
+/// Candidatos de un ítem en orden de ranking, con los datos usados para reproducirlo; se regeneran en bloque.
+// SQL-254 CHECK: ck_quotation_item_options__posicion
+// SQL-255 CHECK: ck_quotation_item_options__importes
+// SQL-256 CHECK: ck_quotation_item_options__componentes
+// SQL-262 CHECK: ck_quotation_item_options__listas
+// SQL-537 RLS (migración 20, TDD §5.2)
+model QuotationItemOption {
+  id                 String           @id(map: "pk_quotation_item_options") @default(uuid(7)) @db.Uuid
+  organizationId     String           @map("organization_id") @db.Uuid
+  itemId             String           @map("item_id") @db.Uuid
+  rank               Int              @db.SmallInt
+  providerId         String           @map("provider_id") @db.Uuid
+  providerName       String           @map("provider_name")
+  packageId          String           @map("package_id") @db.Uuid
+  packageName        String           @map("package_name")
+  subtypeId          String?          @map("subtype_id") @db.Uuid
+  modality           BookingModality
+  unitPrice          Decimal          @map("unit_price") @db.Decimal(14, 2)
+  totalEstimated     Decimal          @map("total_estimated") @db.Decimal(14, 2)
+  currency           String           @default("COP") @db.Char(3)
+  ratingAverage      Decimal?         @map("rating_average") @db.Decimal(3, 2)
+  overBudget         Boolean          @default(false) @map("over_budget")
+  availabilityHint   AvailabilityHint @default(DESCONOCIDA) @map("availability_hint")
+  rankingExplanation String?          @map("ranking_explanation")
+  rankingVersion     Int              @map("ranking_version")
+  rankingComponents  Json             @map("ranking_components")
+  inclusions         String[]         @default([])
+  exclusions         String[]         @default([])
+  createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  item    QuotationItem  @relation("fk_quotation_item_options__quotation_items", fields: [organizationId, itemId], references: [organizationId, id], onDelete: Cascade, onUpdate: Restrict, map: "fk_quotation_item_options__quotation_items")
+  package ServicePackage @relation("fk_quotation_item_options__service_packages", fields: [providerId, packageId], references: [providerId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_item_options__service_packages")
+
+  @@unique([itemId, rank], map: "uq_quotation_item_options__item_id_rank")
+  @@index([organizationId, itemId], map: "ix_quotation_item_options__organization_id_item_id")
+  @@map("quotation_item_options")
+}
+
+/// TDD §4.2.8 y §4.3.8. Fuente: SRS-TRK-001; SRS-TRK-003; OpenAPI ItemTracking
+/// Cada cambio de estado de seguimiento.
+// SQL-431 trigger: trg_quotation_item_tracking_history__inmutable
+// SQL-538 RLS (migración 20, TDD §5.2)
+model QuotationItemTrackingHistory {
+  id             String              @id(map: "pk_quotation_item_tracking_history") @default(uuid(7)) @db.Uuid
+  organizationId String              @map("organization_id") @db.Uuid
+  itemId         String              @map("item_id") @db.Uuid
+  fromStatus     ItemTrackingStatus? @map("from_status")
+  toStatus       ItemTrackingStatus  @map("to_status")
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  actorUserId    String?             @map("actor_user_id") @db.Uuid
+  reason         String?             @db.VarChar(1000)
+  /// Referencia lógica a outbox_events.id (ADR-DATA-03): El outbox se purga a los 30 días
+  sourceEventId  String?             @map("source_event_id") @db.Uuid
+  occurredAt     DateTime            @map("occurred_at") @db.Timestamptz(6)
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  item QuotationItem @relation("fk_quotation_item_tracking_history__quotation_items", fields: [organizationId, itemId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_item_tracking_history__quotation_items")
+
+  @@unique([itemId, sourceEventId, toStatus], where: raw("source_event_id IS NOT NULL"), map: "uq_quotation_item_tracking_history__event")
+  @@index([organizationId, itemId, occurredAt], map: "ix_quotation_item_tracking_history__org_item_id_occurred_at")
+  @@map("quotation_item_tracking_history")
+}
+
+/// TDD §4.2.8 y §4.3.8. Fuente: SRS-QUO-012; DEC-018; ADR-012
+/// Snapshot inmutable de una cotización (§5.3).
+// SQL-257 CHECK: ck_quotation_versions__formato
+// SQL-260 CHECK: ck_quotation_versions__importes
+// SQL-432 trigger: trg_quotation_versions__inmutable
+// SQL-539 RLS (migración 20, TDD §5.2)
+model QuotationVersion {
+  id               String          @id(map: "pk_quotation_versions") @default(uuid(7)) @db.Uuid
+  organizationId   String          @map("organization_id") @db.Uuid
+  quotationId      String          @map("quotation_id") @db.Uuid
+  versionNumber    Int             @map("version_number")
+  trigger          SnapshotTrigger
+  schemaVersion    Int             @map("schema_version") @db.SmallInt
+  snapshot         Json
+  subtotal         Decimal         @db.Decimal(14, 2)
+  commissionAmount Decimal?        @map("commission_amount") @db.Decimal(14, 2)
+  totalEstimated   Decimal         @map("total_estimated") @db.Decimal(14, 2)
+  currency         String          @default("COP") @db.Char(3)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  createdByUserId  String?         @map("created_by_user_id") @db.Uuid
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  quotation          Quotation           @relation("fk_quotation_versions__quotations", fields: [organizationId, quotationId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_versions__quotations")
+  quotationDocuments QuotationDocument[] @relation("fk_quotation_documents__quotation_versions")
+
+  @@unique([quotationId, versionNumber], map: "uq_quotation_versions__quotation_id_version_number")
+  @@unique([organizationId, id], map: "uq_quotation_versions__organization_id_id")
+  @@index([organizationId, quotationId], map: "ix_quotation_versions__organization_id_quotation_id")
+  @@map("quotation_versions")
+}
+
+/// TDD §4.2.8 y §4.3.8. Fuente: SRS-QUO-011; DEC-016; OpenAPI DocumentJob
+/// Trabajo de generación y archivo PDF de una versión.
+// SQL-540 RLS (migración 20, TDD §5.2)
+model QuotationDocument {
+  id                 String            @id(map: "pk_quotation_documents") @default(uuid(7)) @db.Uuid
+  organizationId     String            @map("organization_id") @db.Uuid
+  quotationId        String            @map("quotation_id") @db.Uuid
+  quotationVersionId String            @map("quotation_version_id") @db.Uuid
+  status             DocumentJobStatus @default(PENDIENTE)
+  storageKey         String?           @map("storage_key")
+  attempts           Int               @default(0) @db.SmallInt
+  errorCode          String?           @map("error_code")
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  requestedByUserId  String            @map("requested_by_user_id") @db.Uuid
+  completedAt        DateTime?         @map("completed_at") @db.Timestamptz(6)
+  purgedAt           DateTime?         @map("purged_at") @db.Timestamptz(6)
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  quotation        Quotation        @relation("fk_quotation_documents__quotations", fields: [organizationId, quotationId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_documents__quotations")
+  quotationVersion QuotationVersion @relation("fk_quotation_documents__quotation_versions", fields: [organizationId, quotationVersionId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quotation_documents__quotation_versions")
+
+  @@index([organizationId, quotationId, createdAt], map: "ix_quotation_documents__organization_id_quotation_id_created_at")
+  @@index([organizationId, quotationVersionId], map: "ix_quotation_documents__organization_id_quotation_version_id")
+  @@index([createdAt], where: raw("status = ANY (ARRAY['PENDIENTE'::document_job_status, 'PROCESANDO'::document_job_status])"), map: "ix_quotation_documents__pending")
+  @@map("quotation_documents")
+}
+
+/// TDD §4.2.8 y §4.3.8. Fuente: SRS-QUO-001; SRS-QUO-010
+/// Comparativa rápida guardada, sin evento.
+// SQL-258 CHECK: ck_quick_quotations__datos
+// SQL-541 RLS (migración 20, TDD §5.2)
+model QuickQuotation {
+  id              String    @id(map: "pk_quick_quotations") @default(uuid(7)) @db.Uuid
+  organizationId  String    @map("organization_id") @db.Uuid
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  createdByUserId String    @map("created_by_user_id") @db.Uuid
+  categoryId      String    @map("category_id") @db.Uuid
+  subtypeId       String?   @map("subtype_id") @db.Uuid
+  eventDate       DateTime  @map("event_date") @db.Date
+  guests          Int
+  locationAddress String?   @map("location_address") @db.VarChar(300)
+  locationCity    String    @map("location_city") @db.VarChar(120)
+  latitude        Decimal?  @db.Decimal(9, 6)
+  longitude       Decimal?  @db.Decimal(9, 6)
+  maxBudget       Decimal?  @map("max_budget") @db.Decimal(14, 2)
+  currency        String    @default("COP") @db.Char(3)
+  favorite        Boolean   @default(false)
+  favoritedAt     DateTime? @map("favorited_at") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization          Organization           @relation("fk_quick_quotations__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quick_quotations__organizations")
+  category              Category               @relation("fk_quick_quotations__categories", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quick_quotations__categories")
+  subtype               Subtype?               @relation("fk_quick_quotations__subtypes", fields: [categoryId, subtypeId], references: [categoryId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quick_quotations__subtypes")
+  quickQuotationOptions QuickQuotationOption[] @relation("fk_quick_quotation_options__quick_quotations")
+
+  @@unique([organizationId, id], map: "uq_quick_quotations__organization_id_id")
+  @@index([organizationId, createdAt(sort: Desc)], map: "ix_quick_quotations__organization_id_created_at")
+  @@index([organizationId, favorite, createdAt(sort: Desc)], map: "ix_quick_quotations__organization_id_favorite_created_at")
+  @@map("quick_quotations")
+}
+
+/// TDD §4.2.8 y §4.3.8. Fuente: SRS-QUO-001; OpenAPI QuickQuotationOption
+/// Opciones devueltas por una cotización rápida.
+// SQL-259 CHECK: ck_quick_quotation_options__datos
+// SQL-261 CHECK: ck_quick_quotation_options__componentes
+// SQL-542 RLS (migración 20, TDD §5.2)
+model QuickQuotationOption {
+  id                String          @id(map: "pk_quick_quotation_options") @default(uuid(7)) @db.Uuid
+  organizationId    String          @map("organization_id") @db.Uuid
+  quickQuotationId  String          @map("quick_quotation_id") @db.Uuid
+  rank              Int             @db.SmallInt
+  providerId        String          @map("provider_id") @db.Uuid
+  providerName      String          @map("provider_name")
+  packageId         String          @map("package_id") @db.Uuid
+  subtypeId         String?         @map("subtype_id") @db.Uuid
+  modality          BookingModality
+  totalPrice        Decimal         @map("total_price") @db.Decimal(14, 2)
+  currency          String          @default("COP") @db.Char(3)
+  rankingVersion    Int             @map("ranking_version")
+  rankingComponents Json            @map("ranking_components")
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  quickQuotation QuickQuotation @relation("fk_quick_quotation_options__quick_quotations", fields: [organizationId, quickQuotationId], references: [organizationId, id], onDelete: Cascade, onUpdate: Restrict, map: "fk_quick_quotation_options__quick_quotations")
+  package        ServicePackage @relation("fk_quick_quotation_options__service_packages", fields: [providerId, packageId], references: [providerId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_quick_quotation_options__service_packages")
+
+  @@unique([quickQuotationId, rank], map: "uq_quick_quotation_options__quick_quotation_id_rank")
+  @@index([organizationId, quickQuotationId], map: "ix_quick_quotation_options__organization_id_quick_quotation_id")
+  @@map("quick_quotation_options")
+}
+
+// ===== Módulo 09: assisted-response (TDD §4.2.9) =====
+
+/// TDD §4.2.9 y §4.3.9. Fuente: DDD §4.10; SRS-WA-006..008; DEC-003
+/// Respuesta externa importada y confirmada por una persona. Se crea al confirmar (S-07); el texto importado se minimiza a los 90 días.
+// SQL-300 CHECK: ck_assisted_response_drafts__purga
+// SQL-301 CHECK: ck_assisted_response_drafts__formato
+// SQL-543 RLS (migración 20, TDD §5.2)
+model AssistedResponseDraft {
+  id               String    @id(map: "pk_assisted_response_drafts") @default(uuid(7)) @db.Uuid
+  organizationId   String    @map("organization_id") @db.Uuid
+  requestId        String    @map("request_id") @db.Uuid
+  offerId          String    @map("offer_id") @db.Uuid
+  schemaVersion    String    @map("schema_version")
+  importedResponse Json?     @map("imported_response")
+  validationResult Json      @map("validation_result")
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  importedByUserId String    @map("imported_by_user_id") @db.Uuid
+  importedAt       DateTime  @map("imported_at") @db.Timestamptz(6)
+  confirmedAt      DateTime  @map("confirmed_at") @db.Timestamptz(6)
+  purgedAt         DateTime? @map("purged_at") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  request RfqRequest @relation("fk_assisted_response_drafts__rfq_requests", fields: [organizationId, requestId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_assisted_response_drafts__rfq_requests")
+  offer   RfqOffer   @relation("fk_assisted_response_drafts__rfq_offers", fields: [organizationId, offerId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_assisted_response_drafts__rfq_offers")
+
+  @@unique([organizationId, offerId], map: "uq_assisted_response_drafts__organization_id_offer_id")
+  @@index([organizationId, requestId], map: "ix_assisted_response_drafts__organization_id_request_id")
+  @@index([confirmedAt], where: raw("purged_at IS NULL"), map: "ix_assisted_response_drafts__purge")
+  @@map("assisted_response_drafts")
+}
+
+// ===== Módulo 10: reviews (TDD §4.2.10) =====
+
+/// TDD §4.2.10 y §4.3.10. Fuente: DDD §5.10; SRS-REV-001..008; DEC-030
+/// Reseña única de una contratación completada. La puntuación y el texto no se editan; cambian la respuesta y la visibilidad.
+// SQL-310 CHECK: ck_reviews__puntajes
+// SQL-311 CHECK: ck_reviews__promedio
+// SQL-312 CHECK: ck_reviews__ocultacion
+// SQL-433 trigger: trg_reviews__inmutable
+// SQL-544 RLS (migración 20, TDD §5.2)
+model Review {
+  id                      String       @id(map: "pk_reviews") @default(uuid(7)) @db.Uuid
+  organizationId          String       @map("organization_id") @db.Uuid
+  bookingId               String       @map("booking_id") @db.Uuid
+  /// Referencia lógica a providers.id (ADR-DATA-03): `reviews` no depende de `provider-catalog`
+  providerId              String       @map("provider_id") @db.Uuid
+  /// Referencia lógica a events.id (ADR-DATA-03): No depende de `event-management`
+  eventId                 String       @map("event_id") @db.Uuid
+  organizationDisplayName String       @map("organization_display_name") @db.VarChar(200)
+  punctuality             Int          @db.SmallInt
+  serviceQuality          Int          @map("service_quality") @db.SmallInt
+  communication           Int          @db.SmallInt
+  valueForMoney           Int          @map("value_for_money") @db.SmallInt
+  average                 Decimal      @db.Decimal(3, 2)
+  comment                 String?      @db.VarChar(500)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  authorUserId            String       @map("author_user_id") @db.Uuid
+  status                  ReviewStatus @default(VISIBLE)
+  hiddenAt                DateTime?    @map("hidden_at") @db.Timestamptz(6)
+  providerResponse        String?      @map("provider_response") @db.VarChar(300)
+  respondedAt             DateTime?    @map("responded_at") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  respondedByUserId       String?      @map("responded_by_user_id") @db.Uuid
+  createdAt               DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  booking       Booking        @relation("fk_reviews__bookings", fields: [organizationId, bookingId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_reviews__bookings")
+  reviewReports ReviewReport[] @relation("fk_review_reports__reviews")
+
+  @@unique([organizationId, id], map: "uq_reviews__organization_id_id")
+  @@unique([organizationId, bookingId], map: "uq_reviews__organization_id_booking_id")
+  @@index([providerId, status, createdAt(sort: Desc), id], map: "ix_reviews__provider_id_status_created_at_id")
+  @@index([organizationId, createdAt(sort: Desc)], map: "ix_reviews__organization_id_created_at")
+  @@map("reviews")
+}
+
+/// TDD §4.2.10 y §4.3.10. Fuente: SRS-REV-007; SRS-REV-008; OpenAPI ReviewReport
+/// Reporte de una reseña y su resolución.
+// SQL-313 CHECK: ck_review_reports__resolucion
+// SQL-545 RLS (migración 20, TDD §5.2)
+model ReviewReport {
+  id               String              @id(map: "pk_review_reports") @default(uuid(7)) @db.Uuid
+  organizationId   String              @map("organization_id") @db.Uuid
+  reviewId         String              @map("review_id") @db.Uuid
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  reporterUserId   String              @map("reporter_user_id") @db.Uuid
+  reason           ReviewReportReason
+  details          String?             @db.VarChar(1000)
+  status           ReviewReportStatus  @default(PENDIENTE)
+  decision         ModerationDecision?
+  resolutionReason String?             @map("resolution_reason") @db.VarChar(1000)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  resolvedByUserId String?             @map("resolved_by_user_id") @db.Uuid
+  resolvedAt       DateTime?           @map("resolved_at") @db.Timestamptz(6)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  review Review @relation("fk_review_reports__reviews", fields: [organizationId, reviewId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_review_reports__reviews")
+
+  @@unique([reviewId, reporterUserId], map: "uq_review_reports__review_id_reporter_user_id")
+  @@index([organizationId, reviewId], map: "ix_review_reports__organization_id_review_id")
+  @@index([status, createdAt], map: "ix_review_reports__status_created_at")
+  @@map("review_reports")
+}
+
+// ===== Módulo 11: messaging-notifications (TDD §4.2.11) =====
+
+/// TDD §4.2.11 y §4.3.11. Fuente: DDD §4.11; SAD §9.2; SRS-NOT-003
+/// Plantilla versionada de email o aviso in-app.
+// SQL-330 CHECK: ck_message_templates__asunto
+model MessageTemplate {
+  id              String               @id(map: "pk_message_templates") @default(uuid(7)) @db.Uuid
+  code            String               @db.VarChar(80)
+  templateVersion Int                  @map("template_version")
+  channel         NotificationChannel
+  category        NotificationCategory
+  locale          String               @default("es-CO") @db.VarChar(10)
+  subject         String?
+  body            String
+  mandatory       Boolean              @default(false)
+  active          Boolean              @default(true)
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications Notification[] @relation("fk_notifications__message_templates")
+
+  @@unique([code, channel, templateVersion], map: "uq_message_templates__code_channel_template_version")
+  @@unique([code, channel], where: raw("active = true"), map: "uq_message_templates__active")
+  @@map("message_templates")
+}
+
+/// TDD §4.2.11 y §4.3.11. Fuente: DDD §5.11; SRS-NOT-001; SRS-NOT-002
+/// Un aviso por canal y destinatario. Nunca contiene tokens: el enlace se inserta al enviar.
+// SQL-331 CHECK: ck_notifications__destinatario
+// SQL-546 RLS (migración 20, TDD §5.2)
+model Notification {
+  id                 String               @id(map: "pk_notifications") @default(uuid(7)) @db.Uuid
+  organizationId     String?              @map("organization_id") @db.Uuid
+  userId             String?              @map("user_id") @db.Uuid
+  recipientEmail     String?              @map("recipient_email") @db.Citext
+  channel            NotificationChannel
+  category           NotificationCategory
+  type               String               @db.VarChar(80)
+  templateId         String?              @map("template_id") @db.Uuid
+  title              String
+  body               String
+  actionResourceType String?              @map("action_resource_type")
+  /// Referencia lógica a bookings.id (ADR-DATA-03): Polimórfica según `action_resource_type`
+  actionResourceId   String?              @map("action_resource_id") @db.Uuid
+  readAt             DateTime?            @map("read_at") @db.Timestamptz(6)
+  dispatchStatus     DispatchStatus       @default(PENDIENTE) @map("dispatch_status")
+  /// Referencia lógica a outbox_events.id (ADR-DATA-03): El outbox se purga
+  sourceEventId      String?              @map("source_event_id") @db.Uuid
+  dedupeKey          String               @map("dedupe_key") @db.VarChar(200)
+  anonymizedAt       DateTime?            @map("anonymized_at") @db.Timestamptz(6)
+  createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization     Organization?     @relation("fk_notifications__organizations", fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_notifications__organizations")
+  user             User?             @relation("fk_notifications__users", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_notifications__users")
+  template         MessageTemplate?  @relation("fk_notifications__message_templates", fields: [templateId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_notifications__message_templates")
+  deliveryAttempts DeliveryAttempt[] @relation("fk_delivery_attempts__notifications")
+
+  @@unique([dedupeKey], map: "uq_notifications__dedupe_key")
+  @@index([userId, createdAt(sort: Desc), id], map: "ix_notifications__user_id_created_at_id")
+  @@index([userId, createdAt(sort: Desc)], where: raw("read_at IS NULL AND channel = 'IN_APP'"), map: "ix_notifications__unread")
+  @@index([createdAt], where: raw("channel = 'EMAIL' AND dispatch_status = 'PENDIENTE'"), map: "ix_notifications__pending_email")
+  @@index([organizationId, createdAt], map: "ix_notifications__organization_id_created_at")
+  @@map("notifications")
+}
+
+/// TDD §4.2.11 y §4.3.11. Fuente: SRS-NOT-003; OpenAPI NotificationPreferences
+/// Preferencia por categoría; las obligatorias se imponen en la aplicación.
+model NotificationPreference {
+  userId       String               @map("user_id") @db.Uuid
+  category     NotificationCategory
+  emailEnabled Boolean              @default(true) @map("email_enabled")
+  inAppEnabled Boolean              @default(true) @map("in_app_enabled")
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation("fk_notification_preferences__users", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_notification_preferences__users")
+
+  @@id([userId, category], map: "pk_notification_preferences")
+  @@map("notification_preferences")
+}
+
+/// TDD §4.2.11 y §4.3.11. Fuente: DDD §5.11; SRS-NOT-005; SRS-NOT-006
+/// Intento de transporte de un email y su estado final.
+// SQL-332 CHECK: ck_delivery_attempts__intento
+model DeliveryAttempt {
+  id                String         @id(map: "pk_delivery_attempts") @default(uuid(7)) @db.Uuid
+  notificationId    String         @map("notification_id") @db.Uuid
+  attemptNumber     Int            @map("attempt_number") @db.SmallInt
+  status            DispatchStatus
+  providerMessageId String?        @map("provider_message_id")
+  errorCode         String?        @map("error_code")
+  attemptedAt       DateTime       @map("attempted_at") @db.Timestamptz(6)
+  statusUpdatedAt   DateTime?      @map("status_updated_at") @db.Timestamptz(6)
+  createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notification Notification @relation("fk_delivery_attempts__notifications", fields: [notificationId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_delivery_attempts__notifications")
+
+  @@unique([notificationId, attemptNumber], map: "uq_delivery_attempts__notification_id_attempt_number")
+  @@index([providerMessageId], map: "ix_delivery_attempts__provider_message_id")
+  @@map("delivery_attempts")
+}
+
+/// TDD §4.2.11 y §4.3.11. Fuente: SRS-NOT-006; TEC-011
+/// Eventos del webhook ya recibidos; evita reprocesarlos.
+model EmailWebhookEvent {
+  sgEventId         String    @id(map: "pk_email_webhook_events") @map("sg_event_id")
+  eventType         String    @map("event_type")
+  providerMessageId String?   @map("provider_message_id")
+  occurredAt        DateTime  @map("occurred_at") @db.Timestamptz(6)
+  processedAt       DateTime? @map("processed_at") @db.Timestamptz(6)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([occurredAt], map: "ix_email_webhook_events__occurred_at")
+  @@map("email_webhook_events")
+}
+
+// ===== Módulo 12: administration-audit (TDD §4.2.12) =====
+
+/// TDD §4.2.12 y §4.3.12. Fuente: SRS §4.5; SAD §11.5; SRS-ADM-011; OpenAPI AuditLog
+/// Bitácora inmutable de acciones sensibles y transaccionales (§5.3).
+// SQL-360 CHECK: ck_audit_logs__cambios
+// SQL-434 trigger: trg_audit_logs__inmutable
+// SQL-547 RLS (migración 20, TDD §5.2)
+model AuditLog {
+  id             String      @id(map: "pk_audit_logs") @default(uuid(7)) @db.Uuid
+  occurredAt     DateTime    @map("occurred_at") @db.Timestamptz(6)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  actorUserId    String?     @map("actor_user_id") @db.Uuid
+  actorRole      String      @map("actor_role")
+  /// Referencia lógica a organizations.id (ADR-DATA-03): La bitácora no depende de la vida del recurso
+  organizationId String?     @map("organization_id") @db.Uuid
+  action         String
+  resourceType   String      @map("resource_type")
+  /// Referencia lógica a bookings.id (ADR-DATA-03): Polimórfica según `resource_type`
+  resourceId     String      @map("resource_id")
+  result         AuditResult
+  reason         String?
+  correlationId  String      @map("correlation_id")
+  changes        Json?
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([occurredAt(sort: Desc), id], map: "ix_audit_logs__occurred_at_id")
+  @@index([actorUserId, occurredAt(sort: Desc), id], map: "ix_audit_logs__actor_user_id_occurred_at_id")
+  @@index([organizationId, occurredAt(sort: Desc), id], map: "ix_audit_logs__organization_id_occurred_at_id")
+  @@index([resourceType, occurredAt(sort: Desc), id], map: "ix_audit_logs__resource_type_occurred_at_id")
+  @@index([resourceType, resourceId], map: "ix_audit_logs__resource_type_resource_id")
+  @@map("audit_logs")
+}
+
+/// TDD §4.2.12 y §4.3.12. Fuente: SRS-ADM-010; OpenAPI DisputeResolution; DDD §4.13
+/// Resolución administrativa de una contratación en revisión o en incidencia.
+// SQL-435 trigger: trg_dispute_resolutions__inmutable
+// SQL-548 RLS (migración 20, TDD §5.2)
+model DisputeResolution {
+  id                        String           @id(map: "pk_dispute_resolutions") @default(uuid(7)) @db.Uuid
+  organizationId            String           @map("organization_id") @db.Uuid
+  bookingId                 String           @map("booking_id") @db.Uuid
+  decision                  DisputeDecision
+  resultingBookingStatus    BookingStatus    @map("resulting_booking_status")
+  resultingCommissionStatus CommissionStatus @map("resulting_commission_status")
+  reason                    String           @db.VarChar(1000)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  resolvedByUserId          String           @map("resolved_by_user_id") @db.Uuid
+  resolvedAt                DateTime         @map("resolved_at") @db.Timestamptz(6)
+  createdAt                 DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  booking Booking @relation("fk_dispute_resolutions__bookings", fields: [organizationId, bookingId], references: [organizationId, id], onDelete: Restrict, onUpdate: Restrict, map: "fk_dispute_resolutions__bookings")
+
+  @@index([organizationId, bookingId, resolvedAt], map: "ix_dispute_resolutions__organization_id_booking_id_resolved_at")
+  @@map("dispute_resolutions")
+}
+
+/// TDD §4.2.12 y §4.3.12. Fuente: SRS-ADM-012; SRS-NFR-PRIV-002; DEC-037
+/// Solicitud de consulta, corrección o supresión de datos personales, con plazo en días hábiles.
+// SQL-361 CHECK: ck_data_subject_requests__prorroga
+model DataSubjectRequest {
+  id                  String            @id(map: "pk_data_subject_requests") @default(uuid(7)) @db.Uuid
+  requesterUserId     String            @map("requester_user_id") @db.Uuid
+  type                DataRequestType
+  status              DataRequestStatus @default(RECIBIDA)
+  details             String            @db.VarChar(2000)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  responsibleUserId   String?           @map("responsible_user_id") @db.Uuid
+  dueDate             DateTime          @map("due_date") @db.Date
+  extendedDueDate     DateTime?         @map("extended_due_date") @db.Date
+  extensionReason     String?           @map("extension_reason")
+  extensionNotifiedAt DateTime?         @map("extension_notified_at") @db.Timestamptz(6)
+  resolution          String?           @db.VarChar(2000)
+  resolvedAt          DateTime?         @map("resolved_at") @db.Timestamptz(6)
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  requesterUser       User                 @relation("fk_data_subject_requests__users", fields: [requesterUserId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_data_subject_requests__users")
+  retentionExecutions RetentionExecution[] @relation("fk_retention_executions__data_subject_requests")
+
+  @@index([requesterUserId, createdAt(sort: Desc)], map: "ix_data_subject_requests__requester_user_id_created_at")
+  @@index([status, dueDate], map: "ix_data_subject_requests__status_due_date")
+  @@map("data_subject_requests")
+}
+
+/// TDD §4.2.12 y §4.3.12. Fuente: SRS-ADM-012; DEC-003; H-17
+/// Retención legal activa o liberada sobre un recurso.
+// SQL-362 CHECK: ck_legal_holds__liberacion
+// SQL-436 trigger: trg_legal_holds__sin_borrado
+model LegalHold {
+  id               String                @id(map: "pk_legal_holds") @default(uuid(7)) @db.Uuid
+  resourceType     LegalHoldResourceType @map("resource_type")
+  /// Referencia lógica a bookings.id (ADR-DATA-03): Polimórfica según `resource_type`
+  resourceId       String                @map("resource_id") @db.Uuid
+  reason           String                @db.VarChar(1000)
+  /// Referencia lógica a users.id (ADR-DATA-03): Actor
+  setByUserId      String                @map("set_by_user_id") @db.Uuid
+  setAt            DateTime              @map("set_at") @db.Timestamptz(6)
+  releasedAt       DateTime?             @map("released_at") @db.Timestamptz(6)
+  releasedByUserId String?               @map("released_by_user_id") @db.Uuid
+  releaseReason    String?               @map("release_reason") @db.VarChar(1000)
+  createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([resourceType, resourceId], where: raw("released_at IS NULL"), map: "uq_legal_holds__active")
+  @@map("legal_holds")
+}
+
+/// TDD §4.2.12 y §4.3.12. Fuente: DEC-037; SRS-ADM-012
+/// Festivos de Colombia para el cálculo de días hábiles.
+model Holiday {
+  holidayDate DateTime @id(map: "pk_holidays") @map("holiday_date") @db.Date
+  name        String
+  countryCode String   @default("CO") @map("country_code") @db.Char(2)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("holidays")
+}
+
+/// TDD §4.2.12 y §4.3.12. Fuente: DEC-003; SRS-EVT-007
+/// Registro de cada archivado, anonimización o eliminación.
+// SQL-363 CHECK: ck_retention_executions__filas
+// SQL-437 trigger: trg_retention_executions__inmutable
+model RetentionExecution {
+  id                   String          @id(map: "pk_retention_executions") @default(uuid(7)) @db.Uuid
+  jobName              String          @map("job_name")
+  action               RetentionAction
+  resourceType         String          @map("resource_type")
+  /// Referencia lógica a users.id (ADR-DATA-03): Polimórfica según `resource_type`
+  resourceId           String?         @map("resource_id") @db.Uuid
+  affectedRows         Int             @map("affected_rows")
+  dataSubjectRequestId String?         @map("data_subject_request_id") @db.Uuid
+  result               AuditResult
+  detail               String?
+  executedAt           DateTime        @map("executed_at") @db.Timestamptz(6)
+  createdAt            DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  dataSubjectRequest DataSubjectRequest? @relation("fk_retention_executions__data_subject_requests", fields: [dataSubjectRequestId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_retention_executions__data_subject_requests")
+
+  @@index([executedAt(sort: Desc)], map: "ix_retention_executions__executed_at")
+  @@index([dataSubjectRequestId], map: "ix_retention_executions__data_subject_request_id")
+  @@map("retention_executions")
+}
+
+// ===== Módulo 13: platform (TDD §4.2.13) =====
+
+/// TDD §4.2.13 y §4.3.13. Fuente: SAD §7.4; ADR-008; DDD §8.2
+/// Transactional Outbox: efectos pendientes escritos en la transacción de negocio (§5.3).
+// SQL-390 CHECK: ck_outbox_events__payload
+// SQL-391 CHECK: ck_outbox_events__intentos
+model OutboxEvent {
+  id             String       @id(map: "pk_outbox_events") @default(uuid(7)) @db.Uuid
+  position       BigInt       @default(autoincrement())
+  /// Referencia lógica a organizations.id (ADR-DATA-03): Tabla de sistema sin dependencias
+  organizationId String?      @map("organization_id") @db.Uuid
+  eventType      String       @map("event_type") @db.VarChar(100)
+  eventVersion   Int          @default(1) @map("event_version") @db.SmallInt
+  aggregateType  String       @map("aggregate_type") @db.VarChar(60)
+  /// Referencia lógica a bookings.id (ADR-DATA-03): Polimórfica según `aggregate_type`
+  aggregateId    String       @map("aggregate_id") @db.Uuid
+  payload        Json
+  correlationId  String       @map("correlation_id") @db.VarChar(100)
+  occurredAt     DateTime     @map("occurred_at") @db.Timestamptz(6)
+  status         OutboxStatus @default(PENDIENTE)
+  attempts       Int          @default(0) @db.SmallInt
+  availableAt    DateTime     @default(now()) @map("available_at") @db.Timestamptz(6)
+  lastError      String?      @map("last_error") @db.VarChar(2000)
+  publishedAt    DateTime?    @map("published_at") @db.Timestamptz(6)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([position], map: "uq_outbox_events__position")
+  @@index([availableAt, position], where: raw("status = 'PENDIENTE'"), map: "ix_outbox_events__pending")
+  @@index([occurredAt], where: raw("status <> 'PUBLICADO'"), map: "ix_outbox_events__stuck")
+  @@index([publishedAt], where: raw("status = 'PUBLICADO'"), map: "ix_outbox_events__purge")
+  @@index([aggregateType, aggregateId, position], map: "ix_outbox_events__aggregate_type_aggregate_id_position")
+  @@map("outbox_events")
+}
+
+/// TDD §4.2.13 y §4.3.13. Fuente: SAD §7.4; DDD §8.2
+/// Eventos ya procesados por cada consumidor.
+model ProcessedEvent {
+  consumer    String   @db.VarChar(100)
+  /// Referencia lógica a outbox_events.id (ADR-DATA-03): El outbox se purga antes o después
+  eventId     String   @map("event_id") @db.Uuid
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(6)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@id([consumer, eventId], map: "pk_processed_events")
+  @@index([processedAt], map: "ix_processed_events__processed_at")
+  @@map("processed_events")
+}
+
+/// TDD §4.2.13 y §4.3.13. Fuente: TEC-003; SAD §10.6
+/// Resultado guardado de un comando idempotente durante 24 horas.
+// SQL-392 CHECK: ck_idempotency_keys__principal
+// SQL-393 CHECK: ck_idempotency_keys__respuesta
+model IdempotencyKey {
+  id             String            @id(map: "pk_idempotency_keys") @default(uuid(7)) @db.Uuid
+  /// Referencia lógica a organizations.id (ADR-DATA-03): Tabla de sistema sin dependencias
+  organizationId String?           @map("organization_id") @db.Uuid
+  principalType  String            @map("principal_type") @db.VarChar(20)
+  principalId    String            @map("principal_id")
+  operation      String            @db.VarChar(80)
+  idempotencyKey String            @map("idempotency_key") @db.VarChar(128)
+  requestHash    Bytes             @map("request_hash")
+  status         IdempotencyStatus @default(EN_PROCESO)
+  responseStatus Int?              @map("response_status") @db.SmallInt
+  responseBody   Json?             @map("response_body")
+  resourceId     String?           @map("resource_id") @db.Uuid
+  expiresAt      DateTime          @map("expires_at") @db.Timestamptz(6)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([organizationId, principalType, principalId, operation, idempotencyKey], where: raw("organization_id IS NOT NULL"), map: "uq_idempotency_keys__tenant")
+  @@unique([principalType, principalId, operation, idempotencyKey], where: raw("organization_id IS NULL"), map: "uq_idempotency_keys__global")
+  @@index([expiresAt], map: "ix_idempotency_keys__expires_at")
+  @@map("idempotency_keys")
+}
