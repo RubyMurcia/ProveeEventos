@@ -1,6 +1,7 @@
 // ADR-GOV-003 R1: ningún comentario puede desactivar un control. Complementa noInlineConfig y ban-ts-comment.
+// Ninguna directiva aparece literal: la búsqueda de adr-guard (C2) no excluye esta ruta y R5 veta excepciones.
 const FORBIDDEN =
-  /eslint-(disable|enable)|^\s*eslint\s|@ts-(ignore|expect-error|nocheck)|prettier-ignore|\b(v8|c8|istanbul)\s+ignore\b|gitleaks:allow/i;
+  /eslint-(disable|enable)|^\s*eslint\s|@ts-(ignore|expect-error|nocheck)|prettier-(ignore)|\b(v8|c8|istanbul)\s+ignore\b|gitleaks:(allow)/i;
 
 export default {
   meta: {
