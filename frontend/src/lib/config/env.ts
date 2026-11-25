@@ -7,6 +7,8 @@ import { logger } from '../observability/logger';
 
 const CONFIG_EXIT_CODE = 78;
 const REMOTE = new Set(['staging', 'production']);
+const PUBLIC_URLS = ['APP_BASE_URL', 'AUTH0_ISSUER_BASE_URL', 'CLOUDINARY_UPLOAD_BASE_URL'];
+const LOCAL_ONLY = ['AUTH0_BACKCHANNEL_BASE_URL', 'SENDGRID_API_BASE_URL'];
 
 const text = z.string().min(1);
 const keyList = z
@@ -39,24 +41,34 @@ const webShape = z.object({
   MAPS_BROWSER_KEY: text.optional(),
 });
 
+/** Reglas que dependen del valor crudo: ENV-01 y ENV-02 (CICD §3.4). */
+function sourceProblems(source: Readonly<Record<string, string | undefined>>): string[] {
+  const problems: string[] = [];
+  for (const [name, value] of Object.entries(source)) {
+    if (value?.includes('__GENERATE') === true) problems.push(`${name}: marcador sin generar`);
+  }
+  if (!REMOTE.has(source['APP_ENV'] ?? '')) return problems;
+  const fail = (name: string): number => problems.push(`${name}: opción solo local`);
+  if (source['NODE_ENV'] !== undefined && source['NODE_ENV'] !== 'production') fail('NODE_ENV');
+  if (source['EMAIL_PROVIDER'] === 'smtp') fail('EMAIL_PROVIDER');
+  if (source['SEED_SYNTHETIC'] === 'true') fail('SEED_SYNTHETIC');
+  for (const name of PUBLIC_URLS) {
+    const value = source[name];
+    if (value !== undefined && !value.startsWith('https://')) fail(name);
+  }
+  for (const name of Object.keys(source)) {
+    if (LOCAL_ONLY.includes(name) || name.startsWith('DEV_')) fail(name);
+  }
+  return problems;
+}
+
 const webEnvSchema = webShape.superRefine((env, ctx) => {
-  const fail = (path: string, message: string): void => {
-    ctx.addIssue({ code: 'custom', path: [path], message });
-  };
   if (env.MAPS_PROVIDER === 'google' && env.MAPS_BROWSER_KEY === undefined) {
-    fail('MAPS_BROWSER_KEY', 'variable condicional ausente');
-  }
-  if (!REMOTE.has(env.APP_ENV)) return;
-  if (env.NODE_ENV !== 'production') fail('NODE_ENV', 'opción solo local');
-  if (env.AUTH0_BACKCHANNEL_BASE_URL !== undefined) {
-    fail('AUTH0_BACKCHANNEL_BASE_URL', 'opción solo local');
-  }
-  for (const name of [
-    'APP_BASE_URL',
-    'AUTH0_ISSUER_BASE_URL',
-    'CLOUDINARY_UPLOAD_BASE_URL',
-  ] as const) {
-    if (!env[name].startsWith('https://')) fail(name, 'opción solo local');
+    ctx.addIssue({
+      code: 'custom',
+      path: ['MAPS_BROWSER_KEY'],
+      message: 'variable condicional ausente',
+    });
   }
 });
 
@@ -68,14 +80,14 @@ let cached: Readonly<WebEnv> | undefined;
 export function getEnv(): Readonly<WebEnv> {
   if (cached !== undefined) return cached;
   const source = Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== ''));
-  const unresolved = Object.entries(source)
-    .filter(([, value]) => value?.includes('__GENERATE') === true)
-    .map(([name]) => `${name}: marcador sin generar`);
+  const problems = sourceProblems(source);
   const result = webEnvSchema.safeParse(source);
-  if (!result.success || unresolved.length > 0) {
-    const problems = result.success
-      ? unresolved
-      : [...unresolved, ...result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`)];
+  if (!result.success) {
+    const issues = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
+    logger.fatal({ problems: [...problems, ...issues] }, 'Configuración de entorno no válida');
+    process.exit(CONFIG_EXIT_CODE);
+  }
+  if (problems.length > 0) {
     logger.fatal({ problems }, 'Configuración de entorno no válida');
     process.exit(CONFIG_EXIT_CODE);
   }
